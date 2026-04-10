@@ -14,6 +14,14 @@ ws.onmessage = (e) => {
         if (t) t.textContent = `${msg.remaining}с`;
     }
     if (msg.type === "game_finished") renderLeaderboard(msg.leaderboard);
+
+    if (msg.type === "reveal_answer") {
+    const row = document.getElementById(`opt-${msg.correct_index}`);
+    if (row) {
+        row.classList.remove("bg-slate-700");
+        row.classList.add("bg-green-600");
+    }
+}
 };
 
 document.getElementById("start-btn").onclick = () => {

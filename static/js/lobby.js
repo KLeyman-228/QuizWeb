@@ -1,10 +1,11 @@
 const proto = location.protocol === "https:" ? "wss://" : "ws://";
-const ws = new WebSocket(`${proto}${location.host}/ws/lobby/${window.LOBBY_CODE}/`);
+const ws = new WebSocket(`${proto}${location.host}/ws/room/${window.ROOM_CODE}/`);
 const name = sessionStorage.getItem("name");
 const avatar = sessionStorage.getItem("avatar");
+const token = sessionStorage.getItem(`token_${window.ROOM_CODE}`);  
 
 ws.onopen = () => {
-    ws.send(JSON.stringify({type: "join_player", name, avatar}));
+    ws.send(JSON.stringify({type: "join_player", name, avatar, token}));
 };
 
 ws.onmessage = (e) => {
@@ -16,6 +17,13 @@ ws.onmessage = (e) => {
         if (t) t.textContent = `Осталось: ${msg.remaining}с`;
     }
     if (msg.type === "game_finished") renderLeaderboard(msg.leaderboard);
+
+    if (msg.type === "your_token") {
+    sessionStorage.setItem(`token_${window.ROOM_CODE}`, msg.token);
+    }
+    if (msg.type === "reveal_answer") {
+        revealAnswer(msg.correct_index);
+}
 };
 
 function renderPlayers(players) {
@@ -82,4 +90,29 @@ function renderLeaderboard(list) {
             <span class="text-xl font-bold text-blue-400">${p.exp} exp</span>`;
         box.appendChild(row);
     });
+}
+
+let myAnswer = null;
+
+function revealAnswer(correctIndex) {
+    const buttons = document.querySelectorAll("#options button");
+    buttons.forEach((b, i) => {
+        b.disabled = true;
+        if (i === correctIndex) {
+            b.classList.remove("bg-slate-700", "ring-blue-400");
+            b.classList.add("bg-green-600");
+        } else if (i === myAnswer) {
+            b.classList.remove("bg-slate-700");
+            b.classList.add("bg-red-600");
+        }
+    });
+}
+
+function sendAnswer(i, btn) {
+    if (answered) return;
+    answered = true;
+    myAnswer = i;  // ← новое
+    ws.send(JSON.stringify({type: "answer", option_index: i}));
+    document.querySelectorAll("#options button").forEach(x => x.disabled = true);
+    btn.classList.add("ring-2", "ring-blue-400");
 }
