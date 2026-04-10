@@ -26,7 +26,7 @@ class Lobby(models.Model):
 class Player(models.Model):
     lobby = models.ForeignKey(Lobby, on_delete=models.CASCADE, related_name="players")
     name = models.CharField(max_length=30)
-    avatar = models.CharField(max_length=10, choices=AVATARS_LIST, default='🦊')
+    avatar = models.CharField(max_length=10, default='🦊')
     exp = models.IntegerField(default=0)
     is_host = models.BooleanField(default=False)
     last_answer = models.IntegerField(null=True, blank=True)
