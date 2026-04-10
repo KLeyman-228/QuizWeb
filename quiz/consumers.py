@@ -2,11 +2,11 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from .models import Lobby, Question, Player
-
+import asyncio
 
 
 QUESTIONS_db = {}
-
+ROOM_TIMERS = {}
 
 
 
@@ -30,7 +30,7 @@ class QuizConsumer(AsyncWebsocketConsumer):
 
 
     async def broadcast_lobby(self):
-        players = await self.db_get_players_serialized(self.lobby)
+        players = await db_get_players_serialized(self.lobby)
         await self.channel_layer.group_send(
             self.group_name,
             {"type": "lobby.update", "players": players},
@@ -77,7 +77,7 @@ class QuizConsumer(AsyncWebsocketConsumer):
             self.player_name = exist["name"]
             self.avatar = exist["avatar"]
             self.is_host = exist["is_host"]
-            await self.db_update_player_channel(self.player_id, self.channel_name)
+            await db_update_player_channel(self.player_id, self.channel_name)
         else:
             self.player_name = data.get("name", "Случайная лягушка")[:30]
             self.avatar = data.get("avatar", "👀")[:10]
@@ -87,7 +87,7 @@ class QuizConsumer(AsyncWebsocketConsumer):
                 is_host=False, channel_name=self.channel_name
             )
         
-        new_token = await self.db_get_player_by_token(self.player_id)
+        new_token = await db_get_player_by_token(self.player_id)
         await self.send(text_data=json.dumps({"type": "your_token", "token": new_token}))
         await self.broadcast_lobby()
 
@@ -109,10 +109,10 @@ class QuizConsumer(AsyncWebsocketConsumer):
 
 
     async def handle_start_game(self):
-        question_ids = await self.db_load_random_question_ids(5)
+        question_ids = await db_load_random_question_ids(5)
         QUESTIONS_db[self.lobby_code] = question_ids
         self.lobby.current_question_index = -1
-        await self.db_set_lobby_status(self.lobby, "playing")
+        await db_set_lobby_status(self.lobby, "playing")
         await self.handle_next_question()
 
     async def handle_next_question(self):
@@ -121,13 +121,14 @@ class QuizConsumer(AsyncWebsocketConsumer):
         if next_index >= len(ids):
             await self.handle_finish_game()
             return
-        await self.db_set_question_index(self.lobby, next_index)
+        await db_set_question_index(self.lobby, next_index)
         self.lobby.current_question_index = next_index
-        await self.db_reset_answers(self.lobby)
-        question = await self.db_get_question(ids[next_index])
+        await db_reset_answers(self.lobby)
+        question = await db_get_question(ids[next_index])
         self.current_question = question
         await self.broadcast_question(question)
         await self.broadcast_answer_stats()
+        self.start_question_timer(15)
 
 
     async def handle_answer(self, data):
@@ -136,19 +137,23 @@ class QuizConsumer(AsyncWebsocketConsumer):
         option_index = data.get("option_index")
         if option_index not in (0, 1, 2, 3):
             return
-        player_id = await self.db_get_player_id_by_channel(self.channel_name)
+        player_id = await db_get_player_id_by_channel(self.channel_name)
         if player_id is None:
             return
-        await self.db_save_answer(player_id, option_index)
+        await db_save_answer(player_id, option_index)
         correct = getattr(self, "current_question", {}).get("correct_index")
         if option_index == correct:
-            await self.db_add_exp(player_id, 100)
+            await db_add_exp(player_id, 100)
         await self.broadcast_answer_stats()
 
 
     async def handle_finish_game(self):
-        await self.db_set_lobby_status(self.lobby, "finished")
-        leaderboard = await self.db_get_players_serialized(self.lobby)
+        t = ROOM_TIMERS.get(self.lobby_code)
+        if t and not t.done():
+            t.cancel()
+
+        await db_set_lobby_status(self.lobby, "finished")
+        leaderboard = await db_get_players_serialized(self.lobby)
         await self.channel_layer.group_send(
             self.group_name,
             {"type": "game.finished", "leaderboard": leaderboard},
@@ -180,7 +185,7 @@ class QuizConsumer(AsyncWebsocketConsumer):
 
 
     async def broadcast_answer_stats(self):
-        stats = await self.db_get_answer_stats(self.lobby)
+        stats = await db_get_answer_stats(self.lobby)
         await self.channel_layer.group_send(
             self.group_name,
             {"type": "answer.stats", "stats": stats},
@@ -192,117 +197,118 @@ class QuizConsumer(AsyncWebsocketConsumer):
                 "type": "answer_stats",
                 "stats": event["stats"],
             }))
-
-
-
-    # Lobby and players
-
-    @database_sync_to_async
-    def db_get_or_create_lobby(code):
-        lobby, _ = Lobby.objects.get_or_create(code=code)
-        return lobby
     
 
+    async def _question_timer_coro(self, seconds):
+        try:
+            for remaining in range(seconds, -1, -1):
+                await self.channel_layer.group_send(
+                    self.group_name,
+                    {"type": "timer.tick", "remaining": remaining},
+                )
+                if remaining == 0:
+                    break
+                await asyncio.sleep(1)
+            await self.handle_next_question()
+        except asyncio.CancelledError:
+            pass
 
-    @database_sync_to_async
-    def db_has_host(lobby):
-        return lobby.players.filter(is_host=True).exists()
-    
+    async def timer_tick(self, event):
+        await self.send(text_data=json.dumps({
+            "type": "timer_tick",
+            "remaining": event["remaining"],
+        }))
 
-    @database_sync_to_async
-    def db_create_player(lobby, name, avatar, is_host, channel_name):
-        return Player.objects.create(
-            lobby=lobby, name=name, avatar=avatar,
-            is_host=is_host, channel_name=channel_name,
+    def start_question_timer(self, seconds):
+        old = ROOM_TIMERS.get(self.lobby_code)
+        if old and not old.done():
+            old.cancel()
+        ROOM_TIMERS[self.lobby_code] = asyncio.create_task(
+            self._question_timer_coro(seconds)
         )
 
 
 
-    @database_sync_to_async
-    def db_delete_player_by_channel(channel_name):
-        Player.objects.filter(channel_name=channel_name).delete()
+# Lobby and players
+@database_sync_to_async
+def db_get_or_create_lobby(code):
+    lobby, _ = Lobby.objects.get_or_create(code=code)
+    return lobby
 
-    @database_sync_to_async
-    def db_update_player_channel(player_id, channel_name):
-        Player.objects.filter(id=player_id).update(channel_name=channel_name)
+@database_sync_to_async
+def db_has_host(lobby):
+    return lobby.players.filter(is_host=True).exists()
 
-    @database_sync_to_async
-    def db_get_player_id_by_channel(channel_name):
-        p = Player.objects.filter(channel_name=channel_name).first()
-        return p.id if p else None
+@database_sync_to_async
+def db_create_player(lobby, name, avatar, is_host, channel_name):
+    return Player.objects.create(
+        lobby=lobby, name=name, avatar=avatar,
+        is_host=is_host, channel_name=channel_name,
+    )
+@database_sync_to_async
+def db_delete_player_by_channel(channel_name):
+    Player.objects.filter(channel_name=channel_name).delete()
+@database_sync_to_async
+def db_update_player_channel(player_id, channel_name):
+    Player.objects.filter(id=player_id).update(channel_name=channel_name)
+@database_sync_to_async
+def db_get_player_id_by_channel(channel_name):
+    p = Player.objects.filter(channel_name=channel_name).first()
+    return p.id if p else None
+@database_sync_to_async
+def db_get_player_by_token(token):
+    p = Player.objects.filter(token=token).first()
+    if not p:
+        return None
+    return {"id": p.id, "name": p.name, "avatar": p.avatar, "exp": p.exp, 
+            "is_host": p.is_host, "lobby_id": p.lobby_id}
+@database_sync_to_async
+def db_get_player_token(player_id):
+    return Player.objects.get(id=player_id).token
+@database_sync_to_async
+def db_get_players_serialized(lobby):
+    return [
+        {"id": p.id, "name": p.name, "avatar": p.avatar, "exp": p.exp, "is_host": p.is_host}
+        for p in lobby.players.all().order_by("-exp", "id")
+    ]
 
+# Quiz
+@database_sync_to_async
+def db_load_random_question_ids(n):
+    return list(Question.objects.order_by("?").values_list("id", flat=True)[:n])
+@database_sync_to_async
+def db_get_question(question_id):
+    q = Question.objects.get(id=question_id)
+    return {
+        "id": q.id, "text": q.text,
+        "options": q.options, "correct_index": q.correct_index,
+    }
 
+@database_sync_to_async
+def db_reset_answers(lobby):
+    lobby.players.filter(is_host=False).update(last_answer=None)
+@database_sync_to_async
+def db_save_answer(player_id, option_index):
+    Player.objects.filter(id=player_id).update(last_answer=option_index)
+@database_sync_to_async
+def db_add_exp(player_id, amount):
+    p = Player.objects.get(id=player_id)
+    p.exp = p.exp + amount
+    p.save()
+@database_sync_to_async
+def db_get_answer_stats(lobby):
+    stats = {0: 0, 1: 0, 2: 0, 3: 0}
+    for p in lobby.players.filter(is_host=False):
+        if p.last_answer is not None:
+            stats[p.last_answer] = stats.get(p.last_answer, 0) + 1
+    return stats
 
-    @database_sync_to_async
-    def db_get_player_by_token(token):
-        p = Player.objects.filter(token=token).first()
-        if not p:
-            return None
-        return {"id": p.id, "name": p.name, "avatar": p.avatar, "exp": p.exp, 
-                "is_host": p.is_host, "lobby_id": p.lobby_id}
-
-    @database_sync_to_async
-    def db_get_player_token(player_id):
-        return Player.objects.get(id=player_id).token
-
-
-
-
-    @database_sync_to_async
-    def db_get_players_serialized(lobby):
-        return [
-            {"id": p.id, "name": p.name, "avatar": p.avatar, "exp": p.exp, "is_host": p.is_host}
-            for p in lobby.players.all().order_by("-exp", "id")
-        ]
-    
-
-
-
-    # Quiz
-
-    @database_sync_to_async
-    def db_load_random_question_ids(n):
-        return list(Question.objects.order_by("?").values_list("id", flat=True)[:n])
-
-    @database_sync_to_async
-    def db_get_question(question_id):
-        q = Question.objects.get(id=question_id)
-        return {
-            "id": q.id, "text": q.text,
-            "options": q.options, "correct_index": q.correct_index,
-        }
-    
-
-    @database_sync_to_async
-    def db_reset_answers(lobby):
-        lobby.players.filter(is_host=False).update(last_answer=None)
-
-    @database_sync_to_async
-    def db_save_answer(player_id, option_index):
-        Player.objects.filter(id=player_id).update(last_answer=option_index)
-
-    @database_sync_to_async
-    def db_add_exp(player_id, amount):
-        p = Player.objects.get(id=player_id)
-        p.exp = p.exp + amount
-        p.save()
-
-
-    @database_sync_to_async
-    def db_get_answer_stats(lobby):
-        stats = {0: 0, 1: 0, 2: 0, 3: 0}
-        for p in lobby.players.filter(is_host=False):
-            if p.last_answer is not None:
-                stats[p.last_answer] = stats.get(p.last_answer, 0) + 1
-        return stats
-    
-    @database_sync_to_async
-    def db_set_lobby_status(lobby, status):
-        lobby.status = status
-        lobby.save(update_fields=["status"])
-
-    @database_sync_to_async
-    def db_set_question_index(lobby, index):
-        lobby.current_question_index = index
-        lobby.save(update_fields=["current_question_index"])
+@database_sync_to_async
+def db_set_lobby_status(lobby, status):
+    lobby.status = status
+    lobby.save(update_fields=["status"])
+@database_sync_to_async
+def db_set_question_index(lobby, index):
+    lobby.current_question_index = index
+    lobby.save(update_fields=["current_question_index"])
 
