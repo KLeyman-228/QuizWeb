@@ -1,7 +1,7 @@
 from django.db import models
 import random
 import string
-
+import uuid
 
 
 
@@ -29,9 +29,11 @@ class Player(models.Model):
     avatar = models.CharField(max_length=10, choices=AVATARS_LIST, default='🦊')
     exp = models.IntegerField(default=0)
     is_host = models.BooleanField(default=False)
-    channel_name = models.CharField(max_length=255, blank=True)
     last_answer = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    channel_name = models.CharField(max_length=255, blank=True)
+    token = models.CharField(max_length=64, unique=True, default=uuid.uuid4)
 
 
 
