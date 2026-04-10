@@ -4,6 +4,8 @@ from channels.db import database_sync_to_async
 from .models import Lobby, Question, Player
 import asyncio
 
+import time
+
 
 QUESTIONS_db = {}
 ROOM_TIMERS = {}
@@ -92,7 +94,6 @@ class QuizConsumer(AsyncWebsocketConsumer):
         await self.broadcast_lobby()
 
 
-
     async def handle_join_host(self, data):
         if await self.db_has_host(self.lobby):
             await self.send(text_data=json.dumps({"type": "error", "message": "host exists"}))
@@ -115,6 +116,9 @@ class QuizConsumer(AsyncWebsocketConsumer):
         await db_set_lobby_status(self.lobby, "playing")
         await self.handle_next_question()
 
+
+
+
     async def handle_next_question(self):
         ids = QUESTIONS_db.get(self.lobby_code, [])
         next_index = self.lobby.current_question_index + 1
@@ -128,6 +132,9 @@ class QuizConsumer(AsyncWebsocketConsumer):
         self.current_question = question
         await self.broadcast_question(question)
         await self.broadcast_answer_stats()
+        # Timer
+        self.current_question = question
+        self.question_start_time = time.monotonic()
         self.start_question_timer(15)
 
 
@@ -143,7 +150,9 @@ class QuizConsumer(AsyncWebsocketConsumer):
         await db_save_answer(player_id, option_index)
         correct = getattr(self, "current_question", {}).get("correct_index")
         if option_index == correct:
-            await db_add_exp(player_id, 100)
+            elapsed = time.monotonic() - getattr(self, "question_start_time", 0)
+            speed_bonus = max(0, 100 - int(elapsed * 6))  # 6 очков за секунду
+            await db_add_exp(player_id, 50 + speed_bonus)
         await self.broadcast_answer_stats()
 
 
@@ -165,8 +174,20 @@ class QuizConsumer(AsyncWebsocketConsumer):
             "leaderboard": [p for p in event["leaderboard"] if not p["is_host"]],
         }))
 
+    async def broadcast_reveal_answer(self):
+        correct = getattr(self, "current_question", {}).get("correct_index")
+        if correct is None:
+            return
+        await self.channel_layer.group_send(
+            self.group_name,
+            {"type": "reveal.answer", "correct_index": correct},
+        )
 
-
+    async def reveal_answer(self, event):
+        await self.send(text_data=json.dumps({
+            "type": "reveal_answer",
+            "correct_index": event["correct_index"],
+        }))
 
     async def broadcast_question(self, question):
         # Игроки НЕ должны видеть правильный ответ!
@@ -183,7 +204,6 @@ class QuizConsumer(AsyncWebsocketConsumer):
             "index": event["index"],
         }))
 
-
     async def broadcast_answer_stats(self):
         stats = await db_get_answer_stats(self.lobby)
         await self.channel_layer.group_send(
@@ -198,7 +218,6 @@ class QuizConsumer(AsyncWebsocketConsumer):
                 "stats": event["stats"],
             }))
     
-
     async def _question_timer_coro(self, seconds):
         try:
             for remaining in range(seconds, -1, -1):
@@ -209,6 +228,8 @@ class QuizConsumer(AsyncWebsocketConsumer):
                 if remaining == 0:
                     break
                 await asyncio.sleep(1)
+            await self.broadcast_reval_answer
+            await asyncio.sleep(3)
             await self.handle_next_question()
         except asyncio.CancelledError:
             pass
