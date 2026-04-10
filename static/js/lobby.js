@@ -1,8 +1,8 @@
 const proto = location.protocol === "https:" ? "wss://" : "ws://";
-const ws = new WebSocket(`${proto}${location.host}/ws/room/${window.ROOM_CODE}/`);
+const ws = new WebSocket(`${proto}${location.host}/ws/lobby/${window.LOBBY_CODE}/`);
 const name = sessionStorage.getItem("name");
 const avatar = sessionStorage.getItem("avatar");
-const token = sessionStorage.getItem(`token_${window.ROOM_CODE}`);  
+const token = sessionStorage.getItem(`token_${window.LOBBY_CODE}`);  
 
 ws.onopen = () => {
     ws.send(JSON.stringify({type: "join_player", name, avatar, token}));
@@ -19,7 +19,7 @@ ws.onmessage = (e) => {
     if (msg.type === "game_finished") renderLeaderboard(msg.leaderboard);
 
     if (msg.type === "your_token") {
-    sessionStorage.setItem(`token_${window.ROOM_CODE}`, msg.token);
+    sessionStorage.setItem(`token_${window.LOBBY_CODE}`, msg.token);
     }
     if (msg.type === "reveal_answer") {
         revealAnswer(msg.correct_index);
