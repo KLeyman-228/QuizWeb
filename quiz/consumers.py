@@ -118,7 +118,6 @@ class QuizConsumer(AsyncWebsocketConsumer):
 
 
 
-
     async def handle_next_question(self):
         ids = QUESTIONS_db.get(self.lobby_code, [])
         next_index = self.lobby.current_question_index + 1
@@ -136,7 +135,6 @@ class QuizConsumer(AsyncWebsocketConsumer):
         self.current_question = question
         self.question_start_time = time.monotonic()
         self.start_question_timer(15)
-
 
     async def handle_answer(self, data):
         if getattr(self, "is_host", False):
@@ -156,6 +154,7 @@ class QuizConsumer(AsyncWebsocketConsumer):
         await self.broadcast_answer_stats()
 
 
+
     async def handle_finish_game(self):
         t = ROOM_TIMERS.get(self.lobby_code)
         if t and not t.done():
@@ -173,6 +172,8 @@ class QuizConsumer(AsyncWebsocketConsumer):
             "type": "game_finished",
             "leaderboard": [p for p in event["leaderboard"] if not p["is_host"]],
         }))
+
+
 
     async def broadcast_reveal_answer(self):
         correct = getattr(self, "current_question", {}).get("correct_index")

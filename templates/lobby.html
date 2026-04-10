@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<h1 class="text-3xl font-bold mb-2">Комната {{ code }}</h1>
+<p class="text-slate-400 mb-6">Ждём игроков...</p>
+
+<div id="players" class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6"></div>
+<div id="question" class="hidden bg-slate-800 p-6 rounded-xl"></div>
+<div id="leaderboard" class="hidden bg-slate-800 p-6 rounded-xl"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.LOBBY_CODE = "{{ code }}";
+</script>
+<script src="{% static 'js/lobby.js' %}"></script>
+{% endblock %}

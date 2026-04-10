@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Войти в квиз{% endblock %}
+{% block content %}
+<h1 class="text-4xl font-bold mb-8 text-center">Онлайн Квиз</h1>
+
+<div class="bg-slate-800 p-6 rounded-xl mb-6">
+    <h2 class="text-xl mb-4">Войти в комнату</h2>
+    <input id="code" placeholder="Код (6 символов)"
+           class="w-full p-3 mb-3 rounded bg-slate-700 uppercase">
+    <input id="name" placeholder="Ваше имя"
+           class="w-full p-3 mb-3 rounded bg-slate-700">
+    <div class="flex gap-2 mb-3 text-2xl">
+        <button class="avatar-btn p-2 bg-slate-700 rounded" data-avatar="🦊">🦊</button>
+        <button class="avatar-btn p-2 bg-slate-700 rounded" data-avatar="🐼">🐼</button>
+        <button class="avatar-btn p-2 bg-slate-700 rounded" data-avatar="🐸">🐸</button>
+        <button class="avatar-btn p-2 bg-slate-700 rounded" data-avatar="🦁">🦁</button>
+        <button class="avatar-btn p-2 bg-slate-700 rounded" data-avatar="🐙">🐙</button>
+    </div>
+    <button id="join-btn" class="w-full p-3 bg-blue-600 rounded font-bold">Войти</button>
+</div>
+
+<div class="bg-slate-800 p-6 rounded-xl">
+    <h2 class="text-xl mb-4">Создать комнату (стать хостом)</h2>
+    <button id="host-btn" class="w-full p-3 bg-purple-600 rounded font-bold">Создать</button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let selectedAvatar = "🦊";
+document.querySelectorAll(".avatar-btn").forEach(b => {
+    b.onclick = () => {
+        selectedAvatar = b.dataset.avatar;
+        document.querySelectorAll(".avatar-btn").forEach(x => x.classList.remove("ring-2"));
+        b.classList.add("ring-2", "ring-blue-400");
+    };
+});
+
+document.getElementById("join-btn").onclick = () => {
+    const code = document.getElementById("code").value.toUpperCase().trim();
+    const name = document.getElementById("name").value.trim();
+    if (code.length !== 6 || !name) { alert("Заполни код и имя"); return; }
+    sessionStorage.setItem("name", name);
+    sessionStorage.setItem("avatar", selectedAvatar);
+    window.location.href = `/lobby/${code}/`;
+};
+
+document.getElementById("host-btn").onclick = async () => {
+    const r = await fetch("/api/new-lobby/", {method: "POST"});
+    const data = await r.json();
+    window.location.href = `/host/${data.code}/`;
+};
+</script>
+{% endblock %}

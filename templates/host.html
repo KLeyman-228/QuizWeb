@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-3xl font-bold">Хост: {{ code }}</h1>
+    <div class="flex gap-2">
+        <button id="start-btn" class="px-4 py-2 bg-green-600 rounded">Начать</button>
+        <button id="next-btn" class="px-4 py-2 bg-blue-600 rounded hidden">Следующий</button>
+        <button id="finish-btn" class="px-4 py-2 bg-red-600 rounded">Завершить</button>
+    </div>
+</div>
+
+<div id="players" class="grid grid-cols-3 md:grid-cols-5 gap-2 mb-6"></div>
+<div id="question" class="hidden bg-slate-800 p-6 rounded-xl"></div>
+<div id="leaderboard" class="hidden bg-slate-800 p-6 rounded-xl"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>window.LOBBY_CODE = "{{ code }}";</script>
+<script src="{% static 'js/host.js' %}"></script>
+{% endblock %}
