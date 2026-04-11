@@ -11,6 +11,6 @@ from quiz.routing import websocket_urlpatterns
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": AuthMiddlewareStack(
-        URLRouter(quit.routing.websocket_urlpatterns)
+        URLRouter(websocket_urlpatterns)
     )
 })
