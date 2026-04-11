@@ -1,11 +1,16 @@
 const proto = location.protocol === "https:" ? "wss://" : "ws://";
 const ws = new WebSocket(`${proto}${location.host}/ws/lobby/${window.LOBBY_CODE}/`);
-const name = sessionStorage.getItem("name");
+const playerName = sessionStorage.getItem("name");
 const avatar = sessionStorage.getItem("avatar");
-const token = sessionStorage.getItem(`token_${window.LOBBY_CODE}`);  
+const token = sessionStorage.getItem(`token_${window.LOBBY_CODE}`);
+
+function wsSend(data) {
+    if (ws.readyState !== WebSocket.OPEN) return;
+    ws.send(JSON.stringify(data));
+}
 
 ws.onopen = () => {
-    ws.send(JSON.stringify({type: "join_player", name, avatar, token}));
+    wsSend({type: "join_player", name: playerName, avatar, token});
 };
 
 ws.onmessage = (e) => {
@@ -104,7 +109,7 @@ function sendAnswer(i, btn) {
     if (answered) return;
     answered = true;
     myAnswer = i;  // ← новое
-    ws.send(JSON.stringify({type: "answer", option_index: i}));
+    wsSend({type: "answer", option_index: i});
     document.querySelectorAll("#options button").forEach(x => x.disabled = true);
     btn.classList.add("ring-2", "ring-blue-400");
 }
