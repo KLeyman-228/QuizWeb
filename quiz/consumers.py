@@ -38,7 +38,11 @@ class QuizConsumer(AsyncWebsocketConsumer):
             {"type": "lobby.update", "players": players},
         )
 
-
+    async def lobby_update(self, event):
+        await self.send(text_data=json.dumps({
+            "type": "lobby_update",
+            "players": event["players"],
+        }))
 
 
     async def receive(self, message):
