@@ -2,6 +2,8 @@ const proto = location.protocol === "https:" ? "wss://" : "ws://";
 const ws = new WebSocket(`${proto}${location.host}/ws/lobby/${window.LOBBY_CODE}/`);
 
 ws.onopen = () => ws.send(JSON.stringify({type: "join_host"}));
+ws.onclose = (e) => console.error("WS closed:", e.code, e.reason);
+ws.onerror = (e) => console.error("WS error:", e);
 
 ws.onmessage = (e) => {
     const msg = JSON.parse(e.data);
@@ -24,16 +26,21 @@ ws.onmessage = (e) => {
 }
 };
 
+function wsSend(data) {
+    if (ws.readyState !== WebSocket.OPEN) return;
+    ws.send(JSON.stringify(data));
+}
+
 document.getElementById("start-btn").onclick = () => {
-    ws.send(JSON.stringify({type: "start_game"}));
+    wsSend({type: "start_game"});
     document.getElementById("start-btn").classList.add("hidden");
     document.getElementById("next-btn").classList.remove("hidden");
 };
 document.getElementById("next-btn").onclick = () => {
-    ws.send(JSON.stringify({type: "next_question"}));
+    wsSend({type: "next_question"});
 };
 document.getElementById("finish-btn").onclick = () => {
-    if (confirm("Завершить игру?")) ws.send(JSON.stringify({type: "finish_game"}));
+    if (confirm("Завершить игру?")) wsSend({type: "finish_game"});
 };
 
 function renderPlayers(players) {

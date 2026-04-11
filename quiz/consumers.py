@@ -45,8 +45,8 @@ class QuizConsumer(AsyncWebsocketConsumer):
         }))
 
 
-    async def receive(self, message):
-        data = json.loads(message)
+    async def receive(self, text_data=None, bytes_data=None):
+        data = json.loads(text_data)
         data_type = data.get("type")
 
         if data_type == "join_player":
