@@ -1,24 +1,30 @@
 
 from pathlib import Path
-from decouple import config
-import dj_database_url
+import os
+from dotenv import load_dotenv
+
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 
 
 #'django-insecure-a(sx%jfdkazw#d+c2f0s_^_!t%nx%!^i0w9h@aqlua4ou6bb(='
 
-SECRET_KEY = config('SECRET_KEY')
-DEBUG = config('DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost').split(',')
+SECRET_KEY = os.environ["SECRET_KEY"]
+DEBUG = os.environ.get("DEBUG", "False") == "True"
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 
 # For HTTPS deployments (Railway, etc.)
-CSRF_TRUSTED_ORIGINS = [
-    f'https://{host}' for host in ALLOWED_HOSTS
-    if host not in ('localhost', '127.0.0.1', '*', '')
-]
-
+CSRF_TRUSTED_ORIGINS = []
+for host in ALLOWED_HOSTS:
+    host = host.strip()
+    if not host or host in ('localhost', '127.0.0.1', '*'):
+        continue
+    if host.startswith('.'):
+        CSRF_TRUSTED_ORIGINS.append(f'https://*{host}')
+    else:
+        CSRF_TRUSTED_ORIGINS.append(f'https://{host}')
 
 # Application definition
 
@@ -69,17 +75,21 @@ ASGI_APPLICATION = 'GameQuiz.asgi.application'
 # Database
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=config('DATABASE_URL', default='sqlite:///db.sqlite3')
-    )
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ["DB_NAME"],
+        "USER": os.environ["DB_USER"],
+        "PASSWORD": os.environ["DB_PASSWORD"],
+        "HOST": os.environ["DB_HOST"],
+        "PORT": os.environ["DB_PORT"],
+    }
 }
-
 
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [config('REDIS_URL', default='redis://127.0.0.1:6379')],
+            "hosts": [os.environ.get("REDIS_URL", "redis://127.0.0.1:6379")],
         },
     },
 }
@@ -104,9 +114,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = 'ru-ru'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
