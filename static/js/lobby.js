@@ -1,35 +1,54 @@
 const proto = location.protocol === "https:" ? "wss://" : "ws://";
-const ws = new WebSocket(`${proto}${location.host}/ws/lobby/${window.LOBBY_CODE}/`);
 const playerName = sessionStorage.getItem("name");
 const avatar = sessionStorage.getItem("avatar");
-const token = sessionStorage.getItem(`token_${window.LOBBY_CODE}`);
+
+let ws = null;
+let reconnectDelay = 1000;
+let gameFinished = false;
 
 function wsSend(data) {
-    if (ws.readyState !== WebSocket.OPEN) return;
-    ws.send(JSON.stringify(data));
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(data));
+    }
 }
 
-ws.onopen = () => {
-    wsSend({type: "join_player", name: playerName, avatar, token});
-};
+function connect() {
+    ws = new WebSocket(`${proto}${location.host}/ws/lobby/${window.LOBBY_CODE}/`);
 
-ws.onmessage = (e) => {
-    const msg = JSON.parse(e.data);
-    if (msg.type === "lobby_update") renderPlayers(msg.players);
-    if (msg.type === "question_show") renderQuestion(msg.question, msg.index);
-    if (msg.type === "timer_tick") {
-        const t = document.getElementById("timer");
-        if (t) t.textContent = `Осталось: ${msg.remaining}с`;
-    }
-    if (msg.type === "game_finished") renderLeaderboard(msg.leaderboard);
+    ws.onopen = () => {
+        reconnectDelay = 1000;
+        const token = sessionStorage.getItem(`token_${window.LOBBY_CODE}`);
+        wsSend({type: "join_player", name: playerName, avatar, token});
+    };
 
-    if (msg.type === "your_token") {
-    sessionStorage.setItem(`token_${window.LOBBY_CODE}`, msg.token);
-    }
-    if (msg.type === "reveal_answer") {
-        revealAnswer(msg.correct_index);
+    ws.onmessage = (e) => {
+        const msg = JSON.parse(e.data);
+        if (msg.type === "lobby_update") renderPlayers(msg.players);
+        if (msg.type === "question_show") renderQuestion(msg.question, msg.index);
+        if (msg.type === "timer_tick") {
+            const t = document.getElementById("timer");
+            if (t) t.textContent = `Осталось: ${msg.remaining}с`;
+        }
+        if (msg.type === "game_finished") {
+            gameFinished = true;
+            renderLeaderboard(msg.leaderboard);
+        }
+        if (msg.type === "your_token") {
+            sessionStorage.setItem(`token_${window.LOBBY_CODE}`, msg.token);
+        }
+        if (msg.type === "reveal_answer") {
+            revealAnswer(msg.correct_index);
+        }
+    };
+
+    ws.onclose = () => {
+        if (gameFinished) return;
+        setTimeout(connect, reconnectDelay);
+        reconnectDelay = Math.min(reconnectDelay * 2, 10000);
+    };
 }
-};
+
+connect();
 
 function renderPlayers(players) {
     const box = document.getElementById("players");
@@ -108,7 +127,7 @@ function revealAnswer(correctIndex) {
 function sendAnswer(i, btn) {
     if (answered) return;
     answered = true;
-    myAnswer = i;  // ← новое
+    myAnswer = i;
     wsSend({type: "answer", option_index: i});
     document.querySelectorAll("#options button").forEach(x => x.disabled = true);
     btn.classList.add("ring-2", "ring-blue-400");

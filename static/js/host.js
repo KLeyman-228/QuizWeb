@@ -1,35 +1,53 @@
 const proto = location.protocol === "https:" ? "wss://" : "ws://";
-const ws = new WebSocket(`${proto}${location.host}/ws/lobby/${window.LOBBY_CODE}/`);
 
-ws.onopen = () => ws.send(JSON.stringify({type: "join_host"}));
-ws.onclose = (e) => console.error("WS closed:", e.code, e.reason);
-ws.onerror = (e) => console.error("WS error:", e);
-
-ws.onmessage = (e) => {
-    const msg = JSON.parse(e.data);
-    if (msg.type === "error") { alert(msg.message); return; }
-    if (msg.type === "lobby_update") renderPlayers(msg.players);
-    if (msg.type === "question_show") renderHostQuestion(msg.question, msg.index);
-    if (msg.type === "answer_stats") updateStats(msg.stats);
-    if (msg.type === "timer_tick") {
-        const t = document.getElementById("timer");
-        if (t) t.textContent = `${msg.remaining}с`;
-    }
-    if (msg.type === "game_finished") renderLeaderboard(msg.leaderboard);
-
-    if (msg.type === "reveal_answer") {
-    const row = document.getElementById(`opt-${msg.correct_index}`);
-    if (row) {
-        row.classList.remove("bg-slate-700");
-        row.classList.add("bg-green-600");
-    }
-}
-};
+let ws = null;
+let reconnectDelay = 1000;
+let gameFinished = false;
 
 function wsSend(data) {
-    if (ws.readyState !== WebSocket.OPEN) return;
-    ws.send(JSON.stringify(data));
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(data));
+    }
 }
+
+function connect() {
+    ws = new WebSocket(`${proto}${location.host}/ws/lobby/${window.LOBBY_CODE}/`);
+
+    ws.onopen = () => {
+        reconnectDelay = 1000;
+        ws.send(JSON.stringify({type: "join_host"}));
+    };
+
+    ws.onmessage = (e) => {
+        const msg = JSON.parse(e.data);
+        if (msg.type === "lobby_update") renderPlayers(msg.players);
+        if (msg.type === "question_show") renderHostQuestion(msg.question, msg.index);
+        if (msg.type === "answer_stats") updateStats(msg.stats);
+        if (msg.type === "timer_tick") {
+            const t = document.getElementById("timer");
+            if (t) t.textContent = `${msg.remaining}с`;
+        }
+        if (msg.type === "game_finished") {
+            gameFinished = true;
+            renderLeaderboard(msg.leaderboard);
+        }
+        if (msg.type === "reveal_answer") {
+            const row = document.getElementById(`opt-${msg.correct_index}`);
+            if (row) {
+                row.classList.remove("bg-slate-700");
+                row.classList.add("bg-green-600");
+            }
+        }
+    };
+
+    ws.onclose = () => {
+        if (gameFinished) return;
+        setTimeout(connect, reconnectDelay);
+        reconnectDelay = Math.min(reconnectDelay * 2, 10000);
+    };
+}
+
+connect();
 
 document.getElementById("start-btn").onclick = () => {
     wsSend({type: "start_game"});
@@ -56,7 +74,6 @@ function renderPlayers(players) {
     });
 }
 
-
 function renderHostQuestion(q, idx) {
     document.getElementById("leaderboard").classList.add("hidden");
     const box = document.getElementById("question");
@@ -81,7 +98,6 @@ function renderHostQuestion(q, idx) {
         opts.appendChild(row);
     });
 }
-
 
 function updateStats(stats) {
     for (let i = 0; i < 4; i++) {

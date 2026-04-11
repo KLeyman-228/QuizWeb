@@ -23,7 +23,7 @@ class QuizConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
 
-    async def disconnect(self, code):
+    async def disconnect(self, _code):
         if hasattr(self, "group_name"):
             if self.lobby.status == "wait":
                 await db_delete_player_by_channel(self.channel_name)
@@ -100,10 +100,9 @@ class QuizConsumer(AsyncWebsocketConsumer):
 
 
     async def handle_join_host(self, data):
+        # Если хост уже есть — удаляем старую запись (реконнект хоста)
         if await db_has_host(self.lobby):
-            await self.send(text_data=json.dumps({"type": "error", "message": "host exists"}))
-            await self.close()
-            return
+            await db_delete_host(self.lobby)
         self.player_name = "HOST"
         self.avatar = "🦊"
         self.is_host = True
@@ -267,6 +266,10 @@ def db_has_host(lobby):
     return lobby.players.filter(is_host=True).exists()
 
 @database_sync_to_async
+def db_delete_host(lobby):
+    lobby.players.filter(is_host=True).delete()
+
+@database_sync_to_async
 def db_create_player(lobby, name, avatar, is_host, channel_name):
     return Player.objects.create(
         lobby=lobby, name=name, avatar=avatar,
@@ -324,10 +327,11 @@ def db_add_exp(player_id, amount):
     p.save()
 @database_sync_to_async
 def db_get_answer_stats(lobby):
-    stats = {0: 0, 1: 0, 2: 0, 3: 0}
+    stats = {"0": 0, "1": 0, "2": 0, "3": 0}
     for p in lobby.players.filter(is_host=False):
         if p.last_answer is not None:
-            stats[p.last_answer] = stats.get(p.last_answer, 0) + 1
+            key = str(p.last_answer)
+            stats[key] = stats.get(key, 0) + 1
     return stats
 
 @database_sync_to_async
