@@ -20,7 +20,13 @@ class Lobby(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="wait")
     current_question_index = models.IntegerField(default=-1)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
+    @staticmethod
+    def generate_code():
+        while True:
+            code = "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+            if not Lobby.objects.filter(code=code).exists():
+                return code
 
 
 class Player(models.Model):
@@ -43,13 +49,3 @@ class Question(models.Model):
     correct_index = models.IntegerField()
     category = models.CharField(max_length=50, blank=True)
     difficulty = models.IntegerField(default=1)
-
-
-
-
-@staticmethod
-def generate_code():
-    while True:
-        code = "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
-        if not Lobby.objects.filter(code=code).exists():
-            return code

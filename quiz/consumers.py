@@ -18,15 +18,15 @@ class QuizConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.lobby_code = self.scope["url_route"]["kwargs"]["lobby_code"]
         self.group_name = f"lobby_{self.lobby_code}"
-        self.lobby = await self.db_get_or_create_lobby(self.lobby_code)
+        self.lobby = await db_get_or_create_lobby(self.lobby_code)
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
 
 
     async def disconnect(self, code):
         if hasattr(self, "group_name"):
-            if self.lobby.status == "waiting":
-                await self.db_delete_player_by_channel(self.channel_name)
+            if self.lobby.status == "wait":
+                await db_delete_player_by_channel(self.channel_name)
                 await self.broadcast_lobby()
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
@@ -72,7 +72,7 @@ class QuizConsumer(AsyncWebsocketConsumer):
 
     async def handle_join_player(self, data):
         token = data.get("token")
-        exist = await self.db_get_player_by_token(token) if token else None
+        exist = await db_get_player_by_token(token) if token else None
 
         if exist and exist["lobby_id"] == self.lobby.id:
             self.player_id = exist["id"]
@@ -84,25 +84,26 @@ class QuizConsumer(AsyncWebsocketConsumer):
             self.player_name = data.get("name", "Случайная лягушка")[:30]
             self.avatar = data.get("avatar", "👀")[:10]
             self.is_host = False
-            await self.db_create_player(
-                self.lobby, self.player_name, self.avatar, 
+            player = await db_create_player(
+                self.lobby, self.player_name, self.avatar,
                 is_host=False, channel_name=self.channel_name
             )
-        
-        new_token = await db_get_player_by_token(self.player_id)
+            self.player_id = player.id
+
+        new_token = await db_get_player_token(self.player_id)
         await self.send(text_data=json.dumps({"type": "your_token", "token": new_token}))
         await self.broadcast_lobby()
 
 
     async def handle_join_host(self, data):
-        if await self.db_has_host(self.lobby):
+        if await db_has_host(self.lobby):
             await self.send(text_data=json.dumps({"type": "error", "message": "host exists"}))
             await self.close()
             return
         self.player_name = "HOST"
         self.avatar = "🦊"
         self.is_host = True
-        await self.db_create_player(
+        await db_create_player(
             self.lobby, self.player_name, self.avatar,
             is_host=True, channel_name=self.channel_name,
         )
@@ -113,7 +114,7 @@ class QuizConsumer(AsyncWebsocketConsumer):
         question_ids = await db_load_random_question_ids(5)
         QUESTIONS_db[self.lobby_code] = question_ids
         self.lobby.current_question_index = -1
-        await db_set_lobby_status(self.lobby, "playing")
+        await db_set_lobby_status(self.lobby, "play")
         await self.handle_next_question()
 
 
@@ -160,7 +161,7 @@ class QuizConsumer(AsyncWebsocketConsumer):
         if t and not t.done():
             t.cancel()
 
-        await db_set_lobby_status(self.lobby, "finished")
+        await db_set_lobby_status(self.lobby, "finish")
         leaderboard = await db_get_players_serialized(self.lobby)
         await self.channel_layer.group_send(
             self.group_name,
@@ -229,7 +230,7 @@ class QuizConsumer(AsyncWebsocketConsumer):
                 if remaining == 0:
                     break
                 await asyncio.sleep(1)
-            await self.broadcast_reval_answer
+            await self.broadcast_reveal_answer()
             await asyncio.sleep(3)
             await self.handle_next_question()
         except asyncio.CancelledError:

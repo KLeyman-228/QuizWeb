@@ -62,14 +62,6 @@ function renderQuestion(q, idx) {
     });
 }
 
-function sendAnswer(i, btn) {
-    if (answered) return;
-    answered = true;
-    ws.send(JSON.stringify({type: "answer", option_index: i}));
-    document.querySelectorAll("#options button").forEach(x => x.disabled = true);
-    btn.classList.add("ring-2", "ring-blue-400");
-}
-
 function renderLeaderboard(list) {
     document.getElementById("question").classList.add("hidden");
     document.getElementById("players").classList.add("hidden");
