@@ -9,6 +9,8 @@ import time
 
 QUESTIONS_db = {}
 ROOM_TIMERS = {}
+CURRENT_QUESTIONS = {}   # lobby_code -> question dict
+QUESTION_START_TIMES = {}  # lobby_code -> time.monotonic()
 
 
 
@@ -132,12 +134,10 @@ class QuizConsumer(AsyncWebsocketConsumer):
         self.lobby.current_question_index = next_index
         await db_reset_answers(self.lobby)
         question = await db_get_question(ids[next_index])
-        self.current_question = question
+        CURRENT_QUESTIONS[self.lobby_code] = question
+        QUESTION_START_TIMES[self.lobby_code] = time.monotonic()
         await self.broadcast_question(question)
         await self.broadcast_answer_stats()
-        # Timer
-        self.current_question = question
-        self.question_start_time = time.monotonic()
         self.start_question_timer(15)
 
     async def handle_answer(self, data):
@@ -150,10 +150,10 @@ class QuizConsumer(AsyncWebsocketConsumer):
         if player_id is None:
             return
         await db_save_answer(player_id, option_index)
-        correct = getattr(self, "current_question", {}).get("correct_index")
+        correct = CURRENT_QUESTIONS.get(self.lobby_code, {}).get("correct_index")
         if option_index == correct:
-            elapsed = time.monotonic() - getattr(self, "question_start_time", 0)
-            speed_bonus = max(0, 100 - int(elapsed * 6))  # 6 очков за секунду
+            elapsed = time.monotonic() - QUESTION_START_TIMES.get(self.lobby_code, 0)
+            speed_bonus = max(0, 100 - int(elapsed * 6))
             await db_add_exp(player_id, 50 + speed_bonus)
         await self.broadcast_answer_stats()
 
@@ -180,7 +180,7 @@ class QuizConsumer(AsyncWebsocketConsumer):
 
 
     async def broadcast_reveal_answer(self):
-        correct = getattr(self, "current_question", {}).get("correct_index")
+        correct = CURRENT_QUESTIONS.get(self.lobby_code, {}).get("correct_index")
         if correct is None:
             return
         await self.channel_layer.group_send(
