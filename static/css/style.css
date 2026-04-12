@@ -1,9 +1,9 @@
 :root {
     /* Фоны */
-    --bg-page:        #1B263B;   /* тёмный фон страницы  */
+    --bg-page:        #0D1B2A;   /* тёмный фон страницы  */
     --bg-card:        #415A77;   /* карточки             */
-    --bg-input:       #0D1B2A;   /* поля / варианты      */
-    --bg-input-hover: #778DA9;   /* ховер полей          */
+    --bg-input:       #253552;   /* поля / варианты      */
+    --bg-input-hover: #1B263B;   /* ховер полей          */
 
     /* Текст */
     --text-main:  #f8fafc;
@@ -12,13 +12,13 @@
 
     /* Цвета кнопок */
     --color-primary:       #023E8A;
-    --color-primary-hover: #03045E;
+    --color-primary-hover: #0077B6;
     --color-success:       #FFC300;
     --color-success-hover: #d6a400;
     --color-danger:        #dc2626;
     --color-danger-hover:  #b91c1c;
-    --color-accent:        #00B4D8;
-    --color-accent-hover:  #0077B6;
+    --color-accent:        #d87300;
+    --color-accent-hover:  #b66d00;
 
     /* Скругления */
     --radius:    2rem;   /* карточки */
@@ -138,12 +138,12 @@ body {
 
 .players-grid-host {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 0.5rem;
     margin-bottom: 1.5rem;
 }
 @media (min-width: 768px) {
-    .players-grid-host { grid-template-columns: repeat(10, 1fr); }
+    .players-grid-host { grid-template-columns: repeat(5, 1fr); }
 }
 
 /* ===================================================
