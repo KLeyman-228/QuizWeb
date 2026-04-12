@@ -9,6 +9,7 @@
     --text-main:  #f8fafc;
     --text-muted: #94a3b8;
     --text-score: #FFD60A;   /* синий для очков */
+    --text-select: #0077B6;
 
     /* Цвета кнопок */
     --color-primary:       #023E8A;
@@ -121,7 +122,7 @@ body {
     transition: box-shadow 0.1s;
 }
 .avatar-btn.selected {
-    box-shadow: 0 0 0 2px var(--text-score);
+    box-shadow: 0 0 0 2px var(--text-select);
 }
 
 /* ===================================================
@@ -181,7 +182,7 @@ body {
     box-sizing: border-box;
 }
 .answer-option:hover:not(:disabled) { background: var(--bg-input-hover); }
-.answer-option.selected { box-shadow: 0 0 0 2px var(--text-score); }
+.answer-option.selected { box-shadow: 0 0 0 2px var(--text-select); }
 .answer-option.correct  { background: var(--color-success); }
 .answer-option.wrong    { background: var(--color-danger); }
 
