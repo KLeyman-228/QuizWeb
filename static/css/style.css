@@ -29,7 +29,7 @@
    Базовая раскладка
    =================================================== */
 body {
-    background: linear-gradient(135deg, #0D1B2A 40%, #03044b 100%);
+    background: linear-gradient(135deg, #03044b 30%, #0a1520 100%);
     color: var(--text-main);
     min-height: 100vh;
 }
