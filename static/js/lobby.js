@@ -55,10 +55,10 @@ function renderPlayers(players) {
     box.innerHTML = "";
     players.filter(p => !p.is_host).forEach(p => {
         const d = document.createElement("div");
-        d.className = "bg-slate-800 p-3 rounded text-center";
+        d.className = "player-card";
         d.innerHTML = `<div class="text-3xl">${p.avatar}</div>
                        <div class="font-bold">${p.name}</div>
-                       <div class="text-xs text-slate-400">${p.exp} exp</div>`;
+                       <div class="text-xs text-muted">${p.exp} exp</div>`;
         box.appendChild(d);
     });
 }
@@ -79,7 +79,7 @@ function renderQuestion(q, idx) {
     `;
     q.options.forEach((opt, i) => {
         const b = document.createElement("button");
-        b.className = "p-4 bg-slate-700 rounded hover:bg-slate-600 text-left";
+        b.className = "answer-option";
         b.textContent = `${i + 1}. ${opt}`;
         b.onclick = () => sendAnswer(i, b);
         document.getElementById("options").appendChild(b);
@@ -96,14 +96,14 @@ function renderLeaderboard(list) {
     sorted.forEach((p, i) => {
         const medal = ["🥇", "🥈", "🥉"][i] || `${i + 1}.`;
         const row = document.createElement("div");
-        row.className = "flex items-center justify-between p-3 bg-slate-700 rounded mb-2";
+        row.className = "leaderboard-row";
         row.innerHTML = `
             <div class="flex items-center gap-3">
                 <span class="text-2xl">${medal}</span>
                 <span class="text-2xl">${p.avatar}</span>
                 <span class="font-bold">${p.name}</span>
             </div>
-            <span class="text-xl font-bold text-blue-400">${p.exp} exp</span>`;
+            <span class="text-xl font-bold score-text">${p.exp} exp</span>`;
         box.appendChild(row);
     });
 }
@@ -115,11 +115,10 @@ function revealAnswer(correctIndex) {
     buttons.forEach((b, i) => {
         b.disabled = true;
         if (i === correctIndex) {
-            b.classList.remove("bg-slate-700", "ring-blue-400");
-            b.classList.add("bg-green-600");
+            b.classList.remove("selected");
+            b.classList.add("correct");
         } else if (i === myAnswer) {
-            b.classList.remove("bg-slate-700");
-            b.classList.add("bg-red-600");
+            b.classList.add("wrong");
         }
     });
 }
@@ -130,5 +129,5 @@ function sendAnswer(i, btn) {
     myAnswer = i;
     wsSend({type: "answer", option_index: i});
     document.querySelectorAll("#options button").forEach(x => x.disabled = true);
-    btn.classList.add("ring-2", "ring-blue-400");
+    btn.classList.add("selected");
 }

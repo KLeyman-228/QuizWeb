@@ -34,8 +34,7 @@ function connect() {
         if (msg.type === "reveal_answer") {
             const row = document.getElementById(`opt-${msg.correct_index}`);
             if (row) {
-                row.classList.remove("bg-slate-700");
-                row.classList.add("bg-green-600");
+                row.classList.add("correct");
             }
         }
     };
@@ -66,10 +65,10 @@ function renderPlayers(players) {
     box.innerHTML = "";
     players.filter(p => !p.is_host).forEach(p => {
         const d = document.createElement("div");
-        d.className = "bg-slate-800 p-2 rounded text-center";
+        d.className = "player-card-sm";
         d.innerHTML = `<div class="text-2xl">${p.avatar}</div>
                        <div class="text-sm">${p.name}</div>
-                       <div class="text-xs text-slate-400">${p.exp} exp</div>`;
+                       <div class="text-xs text-muted">${p.exp} exp</div>`;
         box.appendChild(d);
     });
 }
@@ -89,11 +88,11 @@ function renderHostQuestion(q, idx) {
     const opts = document.getElementById("options");
     q.options.forEach((opt, i) => {
         const row = document.createElement("div");
-        row.className = "flex items-center justify-between p-4 bg-slate-700 rounded";
+        row.className = "answer-option-host";
         row.id = `opt-${i}`;
         row.innerHTML = `
             <span class="font-bold">${i + 1}. ${opt}</span>
-            <span class="text-2xl font-bold text-blue-400" data-count>0</span>
+            <span class="text-2xl font-bold score-text" data-count>0</span>
         `;
         opts.appendChild(row);
     });
@@ -118,14 +117,14 @@ function renderLeaderboard(list) {
     sorted.forEach((p, i) => {
         const medal = ["🥇", "🥈", "🥉"][i] || `${i + 1}.`;
         const row = document.createElement("div");
-        row.className = "flex items-center justify-between p-3 bg-slate-700 rounded mb-2";
+        row.className = "leaderboard-row";
         row.innerHTML = `
             <div class="flex items-center gap-3">
                 <span class="text-2xl">${medal}</span>
                 <span class="text-2xl">${p.avatar}</span>
                 <span class="font-bold">${p.name}</span>
             </div>
-            <span class="text-xl font-bold text-blue-400">${p.exp} exp</span>`;
+            <span class="text-xl font-bold score-text">${p.exp} exp</span>`;
         box.appendChild(row);
     });
 }

@@ -1,0 +1,228 @@
+:root {
+    /* Фоны */
+    --bg-page:        #1B263B;   /* тёмный фон страницы  */
+    --bg-card:        #415A77;   /* карточки             */
+    --bg-input:       #0D1B2A;   /* поля / варианты      */
+    --bg-input-hover: #778DA9;   /* ховер полей          */
+
+    /* Текст */
+    --text-main:  #f8fafc;
+    --text-muted: #94a3b8;
+    --text-score: #FFD60A;   /* синий для очков */
+
+    /* Цвета кнопок */
+    --color-primary:       #023E8A;
+    --color-primary-hover: #03045E;
+    --color-success:       #FFC300;
+    --color-success-hover: #d6a400;
+    --color-danger:        #dc2626;
+    --color-danger-hover:  #b91c1c;
+    --color-accent:        #00B4D8;
+    --color-accent-hover:  #0077B6;
+
+    /* Скругления */
+    --radius:    2rem;   /* карточки */
+    --radius-sm: 0.375rem;  /* кнопки / поля */
+}
+
+/* ===================================================
+   Базовая раскладка
+   =================================================== */
+body {
+    background: var(--bg-page);
+    color: var(--text-main);
+    min-height: 100vh;
+}
+
+.page-container {
+    max-width: 48rem;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+/* ===================================================
+   Карточки
+   =================================================== */
+.card {
+    background: var(--bg-card);
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+}
+
+/* ===================================================
+   Поля ввода
+   =================================================== */
+.input {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-radius: var(--radius-sm);
+    background: var(--bg-input);
+    color: var(--text-main);
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    box-sizing: border-box;
+    box-shadow: 4px 4px 6px rgba(0,0,0,0.4);
+}
+.input:focus {
+    box-shadow: 0 0 0 2px var(--color-primary), 4px 4px 6px rgba(0,0,0,0.4);
+}
+
+/* ===================================================
+   Кнопки
+   =================================================== */
+.btn {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--text-main);
+    transition: background 0.15s;
+}
+/* Компактная кнопка (для панели хоста) */
+.btn-sm {
+    display: inline-block;
+    width: auto;
+    padding: 0.5rem 1rem;
+}
+
+.btn-primary        { background: var(--color-primary); }
+.btn-primary:hover  { background: var(--color-primary-hover); }
+.btn-success        { background: var(--color-success); }
+.btn-success:hover  { background: var(--color-success-hover); }
+.btn-danger         { background: var(--color-danger); }
+.btn-danger:hover   { background: var(--color-danger-hover); }
+.btn-accent         { background: var(--color-accent); }
+.btn-accent:hover   { background: var(--color-accent-hover); }
+
+/* ===================================================
+   Выбор аватара
+   =================================================== */
+.avatar-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+.avatar-btn {
+    padding: 0.5rem;
+    background: var(--bg-input);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 1.5rem;
+    transition: box-shadow 0.1s;
+}
+.avatar-btn.selected {
+    box-shadow: 0 0 0 2px var(--text-score);
+}
+
+/* ===================================================
+   Сетки игроков
+   =================================================== */
+.players-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+@media (min-width: 768px) {
+    .players-grid { grid-template-columns: repeat(5, 1fr); }
+}
+
+.players-grid-host {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+@media (min-width: 768px) {
+    .players-grid-host { grid-template-columns: repeat(10, 1fr); }
+}
+
+/* ===================================================
+   Карточки игрока (генерируются JS)
+   =================================================== */
+.player-card {
+    background: var(--bg-card);
+    padding: 0.75rem;
+    border-radius: var(--radius-sm);
+    text-align: center;
+}
+.player-card-sm {
+    background: var(--bg-card);
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+    text-align: center;
+}
+
+/* ===================================================
+   Варианты ответов (генерируются JS)
+   =================================================== */
+.answer-option {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    background: var(--bg-input);
+    border-radius: var(--radius-sm);
+    text-align: left;
+    border: none;
+    color: var(--text-main);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.15s;
+    box-sizing: border-box;
+}
+.answer-option:hover:not(:disabled) { background: var(--bg-input-hover); }
+.answer-option.selected { box-shadow: 0 0 0 2px var(--text-score); }
+.answer-option.correct  { background: var(--color-success); }
+.answer-option.wrong    { background: var(--color-danger); }
+
+/* Хост — вариант со счётчиком ответов */
+.answer-option-host {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: var(--bg-input);
+    border-radius: var(--radius-sm);
+}
+.answer-option-host.correct { background: var(--color-success); }
+
+/* ===================================================
+   Таблица лидеров (генерируется JS)
+   =================================================== */
+.leaderboard-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background: var(--bg-input);
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.5rem;
+}
+
+/* ===================================================
+   Вспомогательные классы
+   =================================================== */
+.text-muted { color: var(--text-muted); }
+.score-text  { color: var(--text-score); }
+.hidden      { display: none !important; }
+
+/* Шапка страницы хоста */
+.host-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+.host-actions {
+    display: flex;
+    gap: 0.5rem;
+}

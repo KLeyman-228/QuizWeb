@@ -1,28 +1,30 @@
 {% extends "base.html" %}
 {% block title %}Войти в квиз{% endblock %}
 {% block content %}
+
 <h1 class="text-4xl font-bold mb-8 text-center">Онлайн Квиз</h1>
 
-<div class="bg-slate-800 p-6 rounded-xl mb-6">
+<div class="card">
     <h2 class="text-xl mb-4">Войти в комнату</h2>
-    <input id="code" placeholder="Код (6 символов)"
-           class="w-full p-3 mb-3 rounded bg-slate-700 uppercase">
-    <input id="name" placeholder="Ваше имя"
-           class="w-full p-3 mb-3 rounded bg-slate-700">
-    <div class="flex gap-2 mb-3 text-2xl">
-        <button class="avatar-btn p-2 bg-slate-700 rounded" data-avatar="🦊">🦊</button>
-        <button class="avatar-btn p-2 bg-slate-700 rounded" data-avatar="🐼">🐼</button>
-        <button class="avatar-btn p-2 bg-slate-700 rounded" data-avatar="🐸">🐸</button>
-        <button class="avatar-btn p-2 bg-slate-700 rounded" data-avatar="🦁">🦁</button>
-        <button class="avatar-btn p-2 bg-slate-700 rounded" data-avatar="🐙">🐙</button>
+    <input id="code" placeholder="Пароль комнаты" class="input" style="text-transform:uppercase">
+    <input id="name" placeholder="Ваше имя" class="input">
+    <div class="avatar-row">
+        <button class="avatar-btn" data-avatar="🦊">🦊</button>
+        <button class="avatar-btn" data-avatar="🐼">🐼</button>
+        <button class="avatar-btn" data-avatar="🐸">🐸</button>
+        <button class="avatar-btn" data-avatar="🦁">🦁</button>
+        <button class="avatar-btn" data-avatar="🐙">🐙</button>
     </div>
-    <button id="join-btn" class="w-full p-3 bg-blue-600 rounded font-bold">Войти</button>
+    <button id="join-btn" class="btn btn-primary">Войти</button>
 </div>
 
-<div class="bg-slate-800 p-6 rounded-xl">
-    <h2 class="text-xl mb-4">Создать комнату (стать хостом)</h2>
-    <button id="host-btn" class="w-full p-3 bg-purple-600 rounded font-bold">Создать</button>
+{% if request.user.is_superuser %}
+<div class="card">
+    <h2 class="text-xl mb-4">Создать комнату</h2>
+    <button id="host-btn" class="btn btn-accent">Создать</button>
 </div>
+{% endif %}
+
 {% endblock %}
 
 {% block extra_js %}
@@ -31,8 +33,8 @@ let selectedAvatar = "🦊";
 document.querySelectorAll(".avatar-btn").forEach(b => {
     b.onclick = () => {
         selectedAvatar = b.dataset.avatar;
-        document.querySelectorAll(".avatar-btn").forEach(x => x.classList.remove("ring-2"));
-        b.classList.add("ring-2", "ring-blue-400");
+        document.querySelectorAll(".avatar-btn").forEach(x => x.classList.remove("selected"));
+        b.classList.add("selected");
     };
 });
 

@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -12,11 +12,15 @@ def lobby_view(request, code):
     return render(request, "lobby.html", {"code": code})
 
 def host_view(request, code):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Доступ запрещён")
     return render(request, "host.html", {"code": code})
 
 @csrf_exempt
 @require_POST
 def new_lobby_api(request):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Доступ запрещён")
     code = Lobby.generate_code()
     Lobby.objects.create(code=code)
     return JsonResponse({"code": code})
