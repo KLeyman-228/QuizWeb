@@ -13,10 +13,10 @@
     /* Цвета кнопок */
     --color-primary:       #023E8A;
     --color-primary-hover: #0077B6;
-    --color-success:       #FFC300;
+    --color-success:       #ff9f1c;
     --color-success-hover: #d6a400;
-    --color-danger:        #7a2020;
-    --color-danger-hover:  #791e1e;
+    --color-danger:        #d00000;
+    --color-danger-hover:  #d00000;
     --color-accent:        #d87300;
     --color-accent-hover:  #b66d00;
 
