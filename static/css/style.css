@@ -15,8 +15,8 @@
     --color-primary-hover: #0077B6;
     --color-success:       #FFC300;
     --color-success-hover: #d6a400;
-    --color-danger:        #dc2626;
-    --color-danger-hover:  #b91c1c;
+    --color-danger:        #7a2020;
+    --color-danger-hover:  #791e1e;
     --color-accent:        #d87300;
     --color-accent-hover:  #b66d00;
 
@@ -29,7 +29,7 @@
    Базовая раскладка
    =================================================== */
 body {
-    background: var(--bg-page);
+    background: linear-gradient(135deg, #0D1B2A 0%, #1a0533 100%);
     color: var(--text-main);
     min-height: 100vh;
 }
@@ -48,6 +48,7 @@ body {
     padding: 1.5rem;
     border-radius: var(--radius);
     margin-bottom: 1.5rem;
+    box-shadow: 3px 3px 6px rgba(14, 14, 14, 0.7);
 }
 
 /* ===================================================
