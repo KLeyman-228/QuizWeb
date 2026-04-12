@@ -66,7 +66,7 @@ body {
     outline: none;
     font-size: 1rem;
     box-sizing: border-box;
-    box-shadow: 4px 4px 6px rgba(0,0,0,0.4);
+    box-shadow: 2px 2px 4px rgba(54, 54, 54, 0.137);
 }
 .input:focus {
     box-shadow: 0 0 0 2px var(--color-primary), 4px 4px 6px rgba(0,0,0,0.4);
