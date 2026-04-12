@@ -23,13 +23,17 @@
         <button class="avatar-btn" data-avatar="🐲">🐲</button>
         <button class="avatar-btn" data-avatar="🦐">🦐</button>
     </div>
-    <button id="join-btn" class="btn btn-primary">Войти</button>
+    <div class="text-center">
+        <button id="join-btn" class="btn btn-sm btn-primary">Войти</button>
+    </div>
 </div>
 
 {% if request.user.is_superuser %}
 <div class="card">
     <h2 class="text-xl mb-4">Создать комнату</h2>
-    <button id="host-btn" class="btn btn-accent">Создать</button>
+    <div class="text-center">
+        <button id="host-btn" class="btn btn-sm btn-accent">Создать</button>
+    </div>
 </div>
 {% endif %}
 
