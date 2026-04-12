@@ -1,3 +1,7 @@
+* {
+    font-family: 'Rubik', sans-serif;
+}
+
 :root {
     /* Фоны */
     --bg-page:        #0D1B2A;   /* тёмный фон страницы  */
