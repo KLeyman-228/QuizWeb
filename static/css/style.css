@@ -65,16 +65,38 @@ body {
     padding: 0.75rem;
     margin-bottom: 0.75rem;
     border-radius: var(--radius-sm);
-    background: var(--bg-input);
+    
+    /* стеклянный фон */
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    
     color: var(--text-main);
-    border: none;
     outline: none;
     font-size: 1rem;
     box-sizing: border-box;
-    box-shadow: 2px 2px 4px rgba(54, 54, 54, 0.137);
+    
+    /* мягкая тень для объёма */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    
+    transition: all 0.2s ease;
 }
+
+.input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
 .input:focus {
-    box-shadow: 0 0 0 2px var(--color-primary), 4px 4px 6px rgba(0,0,0,0.4);
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+}
+
+.glass {
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.2);
 }
 
 /* ===================================================
