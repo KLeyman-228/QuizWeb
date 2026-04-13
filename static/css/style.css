@@ -129,15 +129,26 @@ body {
 .btn-accent:hover   { background: var(--color-accent-hover); }
 
 /* ===================================================
+   Блок входа (сужает карточку на широких экранах)
+   =================================================== */
+.login-wrap {
+    max-width: 30rem;
+    margin: 0 auto;
+}
+
+/* ===================================================
    Выбор аватара
    =================================================== */
 .avatar-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
     gap: 0.5rem;
     margin-bottom: 0.75rem;
 }
 .avatar-btn {
-    padding: 0.5rem;
+    width: 100%;
+    aspect-ratio: 1;
+    padding: 0.4rem;
     background: var(--bg-input);
     border: none;
     border-radius: var(--radius-sm);
@@ -266,10 +277,9 @@ body {
         border-radius: 1rem;
     }
 
-    /* Аватарки переносятся на следующую строку */
+    /* Аватарки — 4 в ряд (3 ряда) на маленьком экране */
     .avatar-row {
-        flex-wrap: wrap;
-        justify-content: center;
+        grid-template-columns: repeat(4, 1fr);
     }
 
     /* Меньше колонок игроков на маленьком экране */

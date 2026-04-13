@@ -2,10 +2,11 @@
 {% block title %}Phys-Dev Quiz{% endblock %}
 {% block content %}
 
-<h1 class="text-2xl md:text-4xl font-bold mb-6 text-center">Добро пожаловать в викторину</h1>
+<h1 class="text-2xl md:text-4xl font-bold mb-6 text-center">Викторина</h1>
 <p class="text-sm md:text-base mb-6 text-center opacity-60 -mt-4">ПОСОЛЬСТВО Game.dev & LatticeLab</p>
 
-<div class="card" style="max-width: 480px; margin-left: auto; margin-right: auto;">
+<div class="login-wrap">
+<div class="card">
     <h2 class="text-xl mb-4 text-center">Войти в комнату</h2>
     <input id="code" placeholder="Пароль комнаты" class="input">
     <input id="name" placeholder="Ваше имя" class="input">
@@ -27,6 +28,7 @@
     <div class="text-center" style="margin-top: 1rem;">
         <button id="join-btn" class="btn btn-sm btn-primary">Войти</button>
     </div>
+</div>
 </div>
 
 {% if request.user.is_superuser %}
