@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Войти в квиз{% endblock %}
+{% block title %}Phys-Dev Quiz{% endblock %}
 {% block content %}
 
 <h1 class="text-2xl md:text-4xl font-bold mb-6 text-center">Добро пожаловать в викторину</h1>
@@ -7,9 +7,9 @@
 
 <div class="card">
     <h2 class="text-xl mb-4 text-center">Войти в комнату</h2>
-    <input id="code" placeholder="Пароль комнаты" class="input" style="text-transform:uppercase">
+    <input id="code" placeholder="Пароль комнаты" class="input">
     <input id="name" placeholder="Ваше имя" class="input">
-    <p class="text-sm text-muted" style="margin-top: 3rem; margin-bottom: 0.5rem;">Выбор аватарки</p>
+    <p class="text-sm text-muted" style="margin-top: 1.5rem; margin-bottom: 0.5rem;">Выбор аватарки</p>
     <div class="avatar-row" style="margin-top: 0.5rem;">
         <button class="avatar-btn" data-avatar="🦊">🦊</button>
         <button class="avatar-btn" data-avatar="🐼">🐼</button>
@@ -24,7 +24,7 @@
         <button class="avatar-btn" data-avatar="🐲">🐲</button>
         <button class="avatar-btn" data-avatar="🦐">🦐</button>
     </div>
-    <div class="text-center" style="margin-top: 3rem;">
+    <div class="text-center" style="margin-top: 1rem;">
         <button id="join-btn" class="btn btn-sm btn-primary">Войти</button>
     </div>
 </div>
