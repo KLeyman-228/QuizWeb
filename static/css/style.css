@@ -133,7 +133,7 @@ body {
    =================================================== */
 .login-wrap {
     min-width: 10rem;
-    max-width: 18rem;
+    max-width: 30rem;
     margin: 0 auto;
 }
 
@@ -279,9 +279,24 @@ body {
         border-radius: 1rem;
     }
 
-    /* Аватарки — 4 в ряд (3 ряда) на маленьком экране */
+    /* Блок входа — на всю ширину */
+    .login-wrap {
+        max-width: 100%;
+        min-width: unset;
+    }
+
+    /* Кнопки-sm становятся полноширинными */
+    .btn-sm {
+        display: block;
+        width: 100%;
+        min-width: unset;
+        box-sizing: border-box;
+    }
+
+    /* Аватарки — 6 в ряд сохраняем, но ограничиваем по ширине */
     .avatar-row {
-        grid-template-columns: repeat(4, 1fr);
+        max-width: 100%;
+        grid-template-columns: repeat(6, 1fr);
     }
 
     /* Меньше колонок игроков на маленьком экране */
