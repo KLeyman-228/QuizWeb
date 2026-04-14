@@ -80,12 +80,14 @@ class QuizConsumer(AsyncWebsocketConsumer):
         token = data.get("token")
         exist = await db_get_player_by_token(token) if token else None
 
+        is_reconnect = False
         if exist and exist["lobby_id"] == self.lobby.id:
             self.player_id = exist["id"]
             self.player_name = exist["name"]
             self.avatar = exist["avatar"]
             self.is_host = exist["is_host"]
             await db_update_player_channel(self.player_id, self.channel_name)
+            is_reconnect = True
         else:
             self.player_name = data.get("name", "Случайная лягушка")[:30]
             self.avatar = data.get("avatar", "👀")[:10]
@@ -100,6 +102,27 @@ class QuizConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({"type": "your_token", "token": new_token}))
         await self.broadcast_lobby()
 
+        # Восстанавливаем состояние для переподключившегося игрока
+        if is_reconnect:
+            if self.lobby.status == "play":
+                question = CURRENT_QUESTIONS.get(self.lobby_code)
+                if question:
+                    safe = {"id": question["id"], "text": question["text"], "options": question["options"]}
+                    await self.send(text_data=json.dumps({
+                        "type": "question_show",
+                        "question": safe,
+                        "index": self.lobby.current_question_index,
+                    }))
+                    already_answered = await db_player_already_answered(self.player_id)
+                    if already_answered:
+                        await self.send(text_data=json.dumps({"type": "already_answered"}))
+            elif self.lobby.status == "finish":
+                leaderboard = await db_get_players_serialized(self.lobby)
+                await self.send(text_data=json.dumps({
+                    "type": "game_finished",
+                    "leaderboard": [p for p in leaderboard if not p["is_host"]],
+                }))
+
 
     async def handle_join_host(self, data):
         # Если хост уже есть — удаляем старую запись (реконнект хоста)
@@ -113,6 +136,28 @@ class QuizConsumer(AsyncWebsocketConsumer):
             is_host=True, channel_name=self.channel_name,
         )
         await self.broadcast_lobby()
+
+        # Восстанавливаем состояние для переподключившегося хоста
+        if self.lobby.status == "play":
+            question = CURRENT_QUESTIONS.get(self.lobby_code)
+            if question:
+                safe = {"id": question["id"], "text": question["text"], "options": question["options"]}
+                await self.send(text_data=json.dumps({
+                    "type": "question_show",
+                    "question": safe,
+                    "index": self.lobby.current_question_index,
+                }))
+                stats = await db_get_answer_stats(self.lobby)
+                await self.send(text_data=json.dumps({
+                    "type": "answer_stats",
+                    "stats": stats,
+                }))
+        elif self.lobby.status == "finish":
+            leaderboard = await db_get_players_serialized(self.lobby)
+            await self.send(text_data=json.dumps({
+                "type": "game_finished",
+                "leaderboard": [p for p in leaderboard if not p["is_host"]],
+            }))
 
 
     async def handle_start_game(self):
@@ -148,6 +193,8 @@ class QuizConsumer(AsyncWebsocketConsumer):
             return
         player_id = await db_get_player_id_by_channel(self.channel_name)
         if player_id is None:
+            return
+        if await db_player_already_answered(player_id):
             return
         await db_save_answer(player_id, option_index)
         correct = CURRENT_QUESTIONS.get(self.lobby_code, {}).get("correct_index")
@@ -342,4 +389,8 @@ def db_set_lobby_status(lobby, status):
 def db_set_question_index(lobby, index):
     lobby.current_question_index = index
     lobby.save(update_fields=["current_question_index"])
+
+@database_sync_to_async
+def db_player_already_answered(player_id):
+    return Player.objects.filter(id=player_id).exclude(last_answer=None).exists()
 

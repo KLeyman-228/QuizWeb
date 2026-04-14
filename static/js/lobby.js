@@ -39,6 +39,10 @@ function connect() {
         if (msg.type === "reveal_answer") {
             revealAnswer(msg.correct_index);
         }
+        if (msg.type === "already_answered") {
+            answered = true;
+            document.querySelectorAll("#options button").forEach(b => b.disabled = true);
+        }
     };
 
     ws.onclose = () => {

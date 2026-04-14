@@ -21,7 +21,12 @@ function connect() {
     ws.onmessage = (e) => {
         const msg = JSON.parse(e.data);
         if (msg.type === "lobby_update") renderPlayers(msg.players);
-        if (msg.type === "question_show") renderHostQuestion(msg.question, msg.index);
+        if (msg.type === "question_show") {
+            renderHostQuestion(msg.question, msg.index);
+            // Восстанавливаем кнопки при реконнекте во время игры
+            document.getElementById("start-btn").classList.add("hidden");
+            document.getElementById("next-btn").classList.remove("hidden");
+        }
         if (msg.type === "answer_stats") updateStats(msg.stats);
         if (msg.type === "timer_tick") {
             const t = document.getElementById("timer");
