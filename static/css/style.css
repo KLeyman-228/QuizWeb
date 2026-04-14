@@ -132,7 +132,8 @@ body {
    Блок входа (сужает карточку на широких экранах)
    =================================================== */
 .login-wrap {
-    min-width: 18rem;
+    min-width: 10rem;
+    max-width: 18rem;
     margin: 0 auto;
 }
 
@@ -142,9 +143,9 @@ body {
 .avatar-row {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    gap: 0.25rem;
+    gap: 0.30rem;
     margin-bottom: 0.75rem;
-    max-width: 11rem;
+    max-width: 13rem;
 }
 .avatar-btn {
     width: 100%;
