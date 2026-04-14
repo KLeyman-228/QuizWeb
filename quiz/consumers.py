@@ -57,6 +57,8 @@ class QuizConsumer(AsyncWebsocketConsumer):
             await self.handle_join_host(data)
         elif data_type == "answer":
             await self.handle_answer(data)
+        elif data_type == "send_message":
+            await self.handle_chat_message(data)
         elif data_type in ("start_game", "next_question", "finish_game"):
             if not getattr(self, "is_host", False):
                 return
@@ -72,7 +74,28 @@ class QuizConsumer(AsyncWebsocketConsumer):
     
 
 
+    async def handle_chat_message(self, data):
+        text = data.get('text', '').strip()[:200]
+        if not text:
+            return
+        player = await db_get_player_by_channel(self.channel_name)
+        if not player:
+            return
+        await self.channel_layer.group_send(
+            self.group_name,
+            {
+                'type': 'chat_message',
+                'player': player,
+                'text': text,
+            }
+        )
 
+    async def chat_message(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'chat_message',
+            'player': event['player'],
+            'text': event['text'],
+        }))
 
 
 
@@ -332,6 +355,13 @@ def db_update_player_channel(player_id, channel_name):
 def db_get_player_id_by_channel(channel_name):
     p = Player.objects.filter(channel_name=channel_name).first()
     return p.id if p else None
+
+@database_sync_to_async
+def db_get_player_by_channel(channel_name):
+    p = Player.objects.filter(channel_name=channel_name).first()
+    if not p:
+        return None
+    return {"id": p.id, "name": p.name, "avatar": p.avatar, "exp": p.exp, "is_host": p.is_host}
 @database_sync_to_async
 def db_get_player_by_token(token):
     p = Player.objects.filter(token=token).first()

@@ -42,6 +42,7 @@ function connect() {
                 row.classList.add("correct");
             }
         }
+        if (msg.type === "chat_message") appendChatMessage(msg.player, msg.text);
     };
 
     ws.onclose = () => {
@@ -64,6 +65,41 @@ document.getElementById("next-btn").onclick = () => {
 document.getElementById("finish-btn").onclick = () => {
     if (confirm("Завершить игру?")) wsSend({type: "finish_game"});
 };
+
+// ── Chat ────────────────────────────────────────────────
+function escapeHtml(s) {
+    return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}
+
+function appendChatMessage(player, text) {
+    const box = document.getElementById("chat-messages");
+    if (!box) return;
+    const div = document.createElement("div");
+    div.className = "chat-msg";
+    div.innerHTML =
+        `<span>${escapeHtml(player.avatar)}</span>` +
+        `<span class="chat-msg-name">${escapeHtml(player.name)}:</span>` +
+        `<span class="chat-msg-text">${escapeHtml(text)}</span>`;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+}
+
+function sendChat() {
+    const input = document.getElementById("chat-input");
+    const text = input.value.trim();
+    if (!text) return;
+    wsSend({type: "send_message", text});
+    input.value = "";
+}
+
+document.getElementById("chat-send").onclick = sendChat;
+document.getElementById("chat-input").addEventListener("keydown", e => {
+    if (e.key === "Enter") sendChat();
+});
+// ────────────────────────────────────────────────────────
 
 function renderPlayers(players) {
     const box = document.getElementById("players");
