@@ -2,7 +2,14 @@
 {% load static %}
 {% block content %}
 
-<h1 class="text-3xl font-bold mb-2">Комната {{ code }}</h1>
+<div class="lobby-header-card card">
+    <div class="text-muted text-sm mb-1">Код комнаты</div>
+    <div class="lobby-code">{{ code }}</div>
+    <div class="lobby-waiting-row">
+        <span class="lobby-dot"></span>
+        <span class="text-muted text-sm" id="player-count">Ожидание игроков...</span>
+    </div>
+</div>
 
 <div id="players" class="players-grid"></div>
 <div id="question" class="card hidden"></div>

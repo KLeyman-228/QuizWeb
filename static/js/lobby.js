@@ -56,15 +56,31 @@ connect();
 
 function renderPlayers(players) {
     const box = document.getElementById("players");
+    const filtered = players.filter(p => !p.is_host);
     box.innerHTML = "";
-    players.filter(p => !p.is_host).forEach(p => {
+
+    const countEl = document.getElementById("player-count");
+    if (countEl) {
+        countEl.textContent = filtered.length === 0
+            ? "Ожидание игроков..."
+            : `${filtered.length} ${playerWord(filtered.length)} в комнате`;
+    }
+
+    filtered.forEach(p => {
         const d = document.createElement("div");
         d.className = "player-card";
-        d.innerHTML = `<div class="text-3xl">${p.avatar}</div>
-                       <div class="font-bold">${p.name}</div>
-                       <div class="text-xs text-muted">${p.exp} exp</div>`;
+        d.innerHTML = `
+            <div class="player-card-avatar">${p.avatar}</div>
+            <div class="player-card-name">${p.name}</div>`;
         box.appendChild(d);
     });
+}
+
+function playerWord(n) {
+    if (n % 100 >= 11 && n % 100 <= 19) return "игроков";
+    if (n % 10 === 1) return "игрок";
+    if (n % 10 >= 2 && n % 10 <= 4) return "игрока";
+    return "игроков";
 }
 
 let answered = false;
