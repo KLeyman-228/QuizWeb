@@ -70,13 +70,18 @@ body {
 
 .container {
     display: grid;
-    grid-template-columns: 320px 1fr;
+    grid-template-columns: 820px 1fr;
     height: 100vh;
 }
 
 .page-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
     min-height: 100%;
     padding: 20px;
+    margin: 0 auto;
+    flex-direction: column;
 }
 
 .community {
