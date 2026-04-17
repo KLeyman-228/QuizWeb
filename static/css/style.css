@@ -40,22 +40,25 @@ body {
     min-height: 100vh;
 }
 
-.container {
-    display: flex;
-    /*max-width: 48rem;*/
-    margin: 0 auto;
-    padding: 1.5rem;
-    flex-direction: row;
+.main {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
 }
 
-.page-container {
-    display: flex;
+.container {
+    display: grid;
+    grid-template-columns: 320px 1fr;
     height: 100vh;
+}
 
-    /* было светлее — делаем глубже */
+
+.page-container {
+    min-height: 100%;
+    padding: 20px;
+
     background-color: #050606;
 
-    /* делаем сетку слабее */
     --color: rgba(37, 148, 83, 0.08);
 
     background-image:
@@ -67,8 +70,7 @@ body {
         transparent 74%,
         var(--color) 75%,
         var(--color) 76%,
-        transparent 77%
-        ),
+        transparent 77%),
         linear-gradient(90deg,
         transparent 24%,
         var(--color) 25%,
@@ -77,19 +79,13 @@ body {
         transparent 74%,
         var(--color) 75%,
         var(--color) 76%,
-        transparent 77%
-        );
+        transparent 77%);
 
     background-size: 50px 50px;
-    background-size: 50px 50px;
-    flex-direction: column;
-    align-content: stretch;
-    justify-content: space-around;
-    align-items: center;
 }
 
 .community {
-  width: 260px;
+  width: 320px;
   border-right: 1px solid rgba(46,213,115,0.2);
   background-color: #0b0f0d;
   padding: 20px;
