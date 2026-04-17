@@ -11,9 +11,6 @@
 </head>
 <body>
     <div class="container">
-        <div class="page-container">
-            {% block content %}{% endblock %}
-        </div>
 
         <div class="community">
             <h2>Организаторы</h2>
@@ -27,9 +24,14 @@
                 <h3>Shader Lab</h3>
                 <p>Graphics / Rendering</p>
         </div>
+    
+        <div class="page-container">
+            {% block content %}{% endblock %}
+        </div>
+
 
     </div>
-    </div>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>
