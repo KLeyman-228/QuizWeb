@@ -37,30 +37,8 @@
 body {
     background: #0f1111;
     color: var(--text-main);
-    min-height: 100vh;
-}
-
-.main {
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-}
-
-.container {
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    height: 100vh;
-}
-
-
-.page-container {
-    min-height: 100%;
-    padding: 20px;
-
     background-color: #050606;
-
     --color: rgba(37, 148, 83, 0.08);
-
     background-image:
         linear-gradient(0deg,
         transparent 24%,
@@ -80,8 +58,25 @@ body {
         var(--color) 75%,
         var(--color) 76%,
         transparent 77%);
-
     background-size: 50px 50px;
+
+}
+
+.main {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    height: 100vh;
+}
+
+.page-container {
+    min-height: 100%;
+    padding: 20px;
 }
 
 .community {
@@ -98,12 +93,13 @@ body {
    Карточки
    =================================================== */
 .card {
-    width: 600px;
+    max-width: 600px;
+    width: 100%;
     padding: 40px;
     background: rgba(0,0,0,0.6);
     border: 1px solid rgba(46,213,115,0.3);
-
     backdrop-filter: blur(10px);
+    margin: 0 auto; 
 }
 
 .discord-card {
