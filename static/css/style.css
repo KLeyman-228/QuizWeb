@@ -45,7 +45,7 @@ body {
     max-width: 48rem;
     margin: 0 auto;
     padding: 1.5rem;
-    flex-direction: column;
+    flex-direction: row;
 }
 
 .page-container {
