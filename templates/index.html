@@ -2,9 +2,9 @@
 {% block title %}Phys-Dev Quiz{% endblock %}
 {% block content %}
 
-<section>
+<section class="hero-block">
     <h1 class="text-3xl text-center md:text-5xl font-bold mb-4" style="color: var(--green-main); letter-spacing: 0.1em;">ВИКТОРИНА</h1>
-    <p class="text-xs md:text-sm mb-8 text-center text-muted" style="letter-spacing: 0.15em; text-transform: uppercase;">Сообщество Game.dev &amp; LatticeLab</p>
+    <p class="text-xs md:text-sm text-center text-muted" style="letter-spacing: 0.15em; text-transform: uppercase;">Сообщество Game.dev &amp; LatticeLab</p>
 </section>
 
 <div class="login-wrap">
@@ -36,8 +36,8 @@
 </div>
 
 {% if request.user.is_superuser %}
-<div class="text-center">
-    <button id="host-btn" type="button" class="btn btn-sm btn-accent">Создать комнату</button>
+<div class="text-center compact-action">
+    <button id="host-btn" type="button" class="btn btn-accent host-create-btn">Создать комнату</button>
 </div>
 {% endif %}
 
