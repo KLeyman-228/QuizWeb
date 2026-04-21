@@ -32,12 +32,32 @@
     --warning: #ffa502;
     --warning-bg: rgba(255, 165, 2, 0.15);
 
-    --accent: #00e5ff;
-    --accent-soft: rgba(0, 229, 255, 0.2);
-
+    --accent: #ffd700;
+    --accent-soft: rgba(255, 215, 0, 0.2);
 
     --radius: 1.2rem;
     --radius-sm: 0.6rem;
+
+    /* Цвета кнопок */
+    --color-primary: #2ed573;
+    --color-primary-hover: #1e9e55;
+    --color-success: #2ed573;
+    --color-success-hover: #1e9e55;
+    --color-danger: #ff4757;
+    --color-danger-hover: #e84148;
+    --color-accent: #ffd700;
+    --color-accent-hover: #e6c200;
+
+    /* Фон аватарок и выделения */
+    --bg-avatar: rgba(255, 255, 255, 0.08);
+    --text-select: #2ed573;
+
+    /* Инпуты */
+    --bg-input: rgba(255, 255, 255, 0.06);
+    --bg-input-hover: rgba(255, 255, 255, 0.12);
+
+    /* Текст счета */
+    --text-score: #7bed9f;
 }
 
 
@@ -45,7 +65,7 @@ body {
     background: var(--bg-main);
     color: var(--text-main);
     background-color: #050606;
-    --color: rgba(37, 148, 83, 0.08);
+    --color: rgba(46, 213, 115, 0.08);
     background-image:
         linear-gradient(0deg,
         transparent 24%,
@@ -71,54 +91,146 @@ body {
 
 .main {
     width: 100%;
-    height: 100%;
-    overflow: auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .container {
     display: grid;
-    grid-template-columns: 820px 1fr;
-    height: 100vh;
+    grid-template-columns: 320px 1fr;
+    min-height: 100vh;
 }
 
 .page-container {
     display: flex;
-    justify-content: space-around;
-    align-items: center;
-    min-height: 100%;
-    padding: 20px;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 60px 40px;
     margin: 0 auto;
     flex-direction: column;
+    gap: 24px;
+    width: 100%;
+    max-width: 900px;
 }
 
 .community {
   width: 320px;
   border-right: 1px solid var(--border-color);
   background-color: var(--bg-secondary);
-  padding: 20px;
+  padding: 24px 16px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
+}
+
+.community h2 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  margin: 0 0 8px 0;
+  padding-left: 8px;
 }
 
 
 .card {
     max-width: 600px;
     width: 100%;
-    padding: 40px;
+    padding: 32px;
     background: rgba(0,0,0,0.6);
     border: 1px solid rgba(46,213,115,0.3);
     backdrop-filter: blur(10px);
-    margin: 0 auto; 
+    margin: 0 auto;
+    box-shadow: var(--glow);
 }
 
 .discord-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius);
-  box-shadow: var(--glow);
-  padding: 15px;
-  transition: 0.2s;
+  width: 100%;
+  background: #0a0a0a;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 4px solid #000;
+  box-shadow: 8px 8px 0px #000;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+
+.discord-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 10px 10px 0px #000;
+}
+
+.discord-banner {
+  width: 100%;
+  height: 80px;
+  background: linear-gradient(90deg, rgba(46, 213, 115, 0.8), rgba(46, 213, 115, 0.3));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.discord-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.discord-banner-placeholder {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  position: absolute;
+  z-index: 1;
+}
+
+.discord-card-content {
+  padding: 16px;
+}
+
+.discord-card h3 {
+  margin: 0 0 6px 0;
+  font-size: 1.1rem;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.discord-card p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #888;
+  font-weight: 400;
+}
+
+.discord-card-stats {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.discord-stat {
+  text-align: center;
+  flex: 1;
+}
+
+.discord-stat-number {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--green-main);
+}
+
+.discord-stat-label {
+  font-size: 0.7rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .input {
@@ -156,50 +268,67 @@ body {
     border: 1px solid rgba(255,255,255,0.2);
 }
 
-/* ===================================================
-   Кнопки
-   =================================================== */
+
 .btn {
-    display: block;
-    width: 100%;
-    padding: 0.75rem;
-    border: none;
-    border-radius: var(--radius-sm);
+    --green: #1BFD9C;
+    font-size: 14px;
+    padding: 0.7em 2em;
+    letter-spacing: 0.06em;
+    position: relative;
+    font-family: inherit;
+    border-radius: 0.6em;
+    overflow: hidden;
+    transition: all 0.3s;
+    line-height: 1.4em;
+    border: 2px solid var(--green);
+    background: linear-gradient(to right, rgba(27, 253, 156, 0.1) 1%, transparent 40%, transparent 60%, rgba(27, 253, 156, 0.1) 100%);
+    color: var(--green);
+    box-shadow: inset 0 0 10px rgba(27, 253, 156, 0.3), 0 0 9px 3px rgba(27, 253, 156, 0.08);
     font-weight: 700;
-    font-size: 1rem;
     cursor: pointer;
-    color: var(--text-main);
-    transition: background 0.15s;
 }
-/* Компактная кнопка (для панели хоста) */
+
+.btn:hover {
+    color: #82ffc9;
+    box-shadow: inset 0 0 10px rgba(27, 253, 156, 0.5), 0 0 9px 3px rgba(27, 253, 156, 0.15);
+}
+
+.btn:before {
+    content: "";
+    position: absolute;
+    left: -4em;
+    width: 4em;
+    height: 100%;
+    top: 0;
+    transition: transform 0.4s ease-in-out;
+    background: linear-gradient(to right, transparent 1%, rgba(27, 253, 156, 0.15) 40%, rgba(27, 253, 156, 0.15) 60%, transparent 100%);
+}
+
+.btn:hover:before {
+    transform: translateX(15em);
+}
+
 .btn-sm {
     display: inline-block;
     width: auto;
-    min-width: 25rem;
-    padding: 0.5rem 1rem;
+    min-width: 16rem;
+    padding: 0.6em 1.8em;
+    font-size: 13px;
 }
 
-.btn-primary        { background: var(--color-primary); }
-.btn-primary:hover  { background: var(--color-primary-hover); }
-.btn-success        { background: var(--color-success); }
-.btn-success:hover  { background: var(--color-success-hover); }
-.btn-danger         { background: var(--color-danger); }
-.btn-danger:hover   { background: var(--color-danger-hover); }
-.btn-accent         { background: var(--color-accent); }
-.btn-accent:hover   { background: var(--color-accent-hover); }
+.btn-primary       { --green: #2ed573; }
+.btn-success       { --green: #2ed573; }
+.btn-danger        { --green: #ff4757; }
+.btn-accent        { --green: #ffd700; }
 
-/* ===================================================
-   Блок входа (сужает карточку на широких экранах)
-   =================================================== */
+
 .login-wrap {
     min-width: 10rem;
     max-width: 30rem;
     margin: 0 auto;
 }
 
-/* ===================================================
-   Выбор аватара
-   =================================================== */
+
 .avatar-row {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
@@ -213,7 +342,7 @@ body {
     width: 100%;
     aspect-ratio: 1;
     padding: 0.1rem;
-    background: var(--bg-avarar);
+    background: var(--bg-avatar);
     border: none;
     border-radius: var(--radius-sm);
     cursor: pointer;
@@ -224,9 +353,7 @@ body {
     box-shadow: 0 0 0 2px var(--text-select);
 }
 
-/* ===================================================
-   Сетки игроков
-   =================================================== */
+
 .players-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -247,9 +374,7 @@ body {
     .players-grid-host { grid-template-columns: repeat(5, 1fr); }
 }
 
-/* ===================================================
-   Шапка лобби
-   =================================================== */
+
 .lobby-header-card {
     text-align: center;
     padding: 1.5rem;
@@ -280,9 +405,7 @@ body {
     50%       { opacity: 0.4; transform: scale(0.7); }
 }
 
-/* ===================================================
-   Карточки игрока (генерируются JS)
-   =================================================== */
+
 .player-card {
     background: rgba(255, 255, 255, 0.06);
     backdrop-filter: blur(12px);
@@ -315,38 +438,50 @@ body {
     text-align: center;
 }
 
-/* ===================================================
-   Варианты ответов (генерируются JS)
-   =================================================== */
+
 .answer-option {
     --main-color: rgb(46, 213, 115);
-    --main-bg-color: rgba(46, 213, 116, 0.2);
-    --pattern-color: rgba(46, 213, 116, 0.05);
+    --main-bg-color: rgba(46, 213, 116, 0.36);
+    --pattern-color: rgba(46, 213, 116, 0.073);
 
     cursor: pointer;
     text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.3rem;
 
     background:
-        radial-gradient(circle, var(--main-bg-color) 0%, transparent 95%),
+        radial-gradient(circle, var(--main-bg-color) 0%, rgba(0, 0, 0, 0) 95%),
         linear-gradient(var(--pattern-color) 1px, transparent 1px),
         linear-gradient(to right, var(--pattern-color) 1px, transparent 1px);
 
     background-size: cover, 15px 15px, 15px 15px;
+    background-position: center center, center center, center center;
 
-    border: 1px solid rgba(46,213,115,0.3);
+    border-width: 1px 0 1px 0;
+    border-style: solid;
+    border-image: radial-gradient(circle, var(--main-color) 0%, rgba(0, 0, 0, 0) 100%) 1;
 
     color: var(--main-color);
-    padding: 15px;
+    padding: 1rem 1.5rem;
+    font-weight: 700;
     font-size: 1rem;
 
-    transition: 0.2s;
+    transition: background-size 0.2s ease-in-out, filter 0.2s;
 }
-.answer-option:hover:not(:disabled) { background: var(--bg-input-hover); }
-.answer-option.selected { box-shadow: 0 0 0 2px var(--text-select); }
-.answer-option.correct  { background: var(--color-success); }
-.answer-option.wrong    { background: var(--color-danger); }
 
-/* Хост — вариант со счётчиком ответов */
+.answer-option:hover:not(:disabled) {
+    background-size: cover, 10px 10px, 10px 10px;
+}
+
+.answer-option:active {
+    filter: hue-rotate(250deg);
+}
+
+.answer-option.selected { box-shadow: 0 0 0 2px var(--text-select); }
+.answer-option.correct  { background: var(--color-success); filter: none; }
+.answer-option.wrong    { background: var(--color-danger); filter: none; }
+
+
 .answer-option-host {
     display: flex;
     align-items: center;
@@ -357,9 +492,7 @@ body {
 }
 .answer-option-host.correct { background: var(--color-success); }
 
-/* ===================================================
-   Таблица лидеров (генерируется JS)
-   =================================================== */
+
 .leaderboard-row {
     display: flex;
     align-items: center;
@@ -370,14 +503,15 @@ body {
     margin-bottom: 0.5rem;
 }
 
-/* ===================================================
-   Вспомогательные классы
-   =================================================== */
+
+
+
+
 .text-muted { color: var(--text-muted); }
 .score-text  { color: var(--text-score); }
 .hidden      { display: none !important; }
 
-/* Шапка страницы хоста */
+
 .host-header {
     display: flex;
     align-items: center;
@@ -389,9 +523,13 @@ body {
     gap: 0.5rem;
 }
 
-/* ===================================================
-   Чат
-   =================================================== */
+
+
+
+
+
+
+
 .chat-messages {
     max-height: 180px;
     min-height: 2rem;
@@ -438,16 +576,51 @@ body {
     flex-shrink: 0;
 }
 
-/* ===================================================
-   Мобильные устройства (≤ 600px)
-   =================================================== */
-@media (max-width: 600px) {
+
+
+
+
+/* Мобильный адаптив */
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+
+    .community {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        flex-direction: column;
+        padding: 16px 12px;
+        gap: 16px;
+    }
+
+    .community h2 {
+        display: none;
+    }
+
+    .discord-card {
+        max-width: 340px;
+        margin: 0 auto;
+    }
+
     .page-container {
-        padding: 0.75rem;
+        padding: 24px 16px;
+        gap: 20px;
     }
 
     .card {
-        padding: 1rem;
+        padding: 24px 18px;
+    }
+}
+
+@media (max-width: 600px) {
+    .page-container {
+        padding: 16px 10px;
+    }
+
+    .card {
+        padding: 20px 14px;
         border-radius: 1rem;
     }
 
@@ -497,6 +670,21 @@ body {
     .answer-option,
     .answer-option-host {
         padding: 0.875rem 0.75rem;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
+        letter-spacing: 0.15rem;
+    }
+
+    /* Чат на мобильных */
+    .chat-messages {
+        max-height: 140px;
+    }
+
+    /* Discord карточки на мобильных */
+    .discord-banner {
+        height: 60px;
+    }
+    
+    .discord-banner-placeholder {
+        font-size: 0.65rem;
     }
 }
