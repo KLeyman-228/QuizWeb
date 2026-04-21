@@ -5,6 +5,8 @@ const avatar = sessionStorage.getItem("avatar");
 let ws = null;
 let reconnectDelay = 1000;
 let gameFinished = false;
+let answered = false;
+let myAnswer = null;
 
 function wsSend(data) {
     if (ws && ws.readyState === WebSocket.OPEN) {
@@ -18,16 +20,17 @@ function connect() {
     ws.onopen = () => {
         reconnectDelay = 1000;
         const token = sessionStorage.getItem(`token_${window.LOBBY_CODE}`);
-        wsSend({type: "join_player", name: playerName, avatar, token});
+        wsSend({ type: "join_player", name: playerName, avatar, token });
     };
 
-    ws.onmessage = (e) => {
-        const msg = JSON.parse(e.data);
+    ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+
         if (msg.type === "lobby_update") renderPlayers(msg.players);
         if (msg.type === "question_show") renderQuestion(msg.question, msg.index);
         if (msg.type === "timer_tick") {
-            const t = document.getElementById("timer");
-            if (t) t.textContent = `Осталось: ${msg.remaining}с`;
+            const timer = document.getElementById("timer");
+            if (timer) timer.textContent = `Осталось: ${msg.remaining}с`;
         }
         if (msg.type === "game_finished") {
             gameFinished = true;
@@ -36,12 +39,12 @@ function connect() {
         if (msg.type === "your_token") {
             sessionStorage.setItem(`token_${window.LOBBY_CODE}`, msg.token);
         }
-        if (msg.type === "reveal_answer") {
-            revealAnswer(msg.correct_index);
-        }
+        if (msg.type === "reveal_answer") revealAnswer(msg.correct_index);
         if (msg.type === "already_answered") {
             answered = true;
-            document.querySelectorAll("#options button").forEach(b => b.disabled = true);
+            document.querySelectorAll("#options button").forEach((button) => {
+                button.disabled = true;
+            });
         }
         if (msg.type === "chat_message") appendChatMessage(msg.player, msg.text);
     };
@@ -57,81 +60,88 @@ connect();
 
 function renderPlayers(players) {
     const box = document.getElementById("players");
-    const filtered = players.filter(p => !p.is_host);
+    const filtered = players.filter((player) => !player.is_host);
+    const countEl = document.getElementById("player-count");
+
     box.innerHTML = "";
 
-    const countEl = document.getElementById("player-count");
     if (countEl) {
         countEl.textContent = filtered.length === 0
             ? "Ожидание игроков..."
             : `${filtered.length} ${playerWord(filtered.length)} в комнате`;
     }
 
-    filtered.forEach(p => {
-        const d = document.createElement("div");
-        d.className = "player-card";
-        d.innerHTML = `
-            <div class="player-card-avatar">${p.avatar}</div>
-            <div class="player-card-name">${p.name}</div>`;
-        box.appendChild(d);
+    filtered.forEach((player) => {
+        const item = document.createElement("div");
+        item.className = "player-card";
+        item.innerHTML = `
+            <div class="player-card-avatar">${player.avatar}</div>
+            <div class="player-card-name">${player.name}</div>
+        `;
+        box.appendChild(item);
     });
 }
 
-function playerWord(n) {
-    if (n % 100 >= 11 && n % 100 <= 19) return "игроков";
-    if (n % 10 === 1) return "игрок";
-    if (n % 10 >= 2 && n % 10 <= 4) return "игрока";
+function playerWord(count) {
+    if (count % 100 >= 11 && count % 100 <= 19) return "игроков";
+    if (count % 10 === 1) return "игрок";
+    if (count % 10 >= 2 && count % 10 <= 4) return "игрока";
     return "игроков";
 }
 
-let answered = false;
-
-function renderQuestion(q, idx) {
+function renderQuestion(question, index) {
     answered = false;
+    myAnswer = null;
+
     document.getElementById("players").classList.add("hidden");
     document.getElementById("leaderboard").classList.add("hidden");
+
     const box = document.getElementById("question");
     box.classList.remove("hidden");
     box.innerHTML = `
-        <div class="text-slate-400 mb-2">Вопрос ${idx + 1}</div>
-        <div class="text-xl font-bold mb-4">${q.text}</div>
+        <div class="text-slate-400 mb-2">Вопрос ${index + 1}</div>
+        <div class="text-xl font-bold mb-4">${question.text}</div>
         <div id="options" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
         <div id="timer" class="text-right text-slate-400 mt-3"></div>
     `;
-    q.options.forEach((opt, i) => {
-        const b = document.createElement("button");
-        b.className = "answer-option";
-        b.textContent = `${i + 1}. ${opt}`;
-        b.onclick = () => sendAnswer(i, b);
-        document.getElementById("options").appendChild(b);
+
+    question.options.forEach((option, optionIndex) => {
+        const button = document.createElement("button");
+        button.className = "answer-option";
+        button.textContent = `${optionIndex + 1}. ${option}`;
+        button.onclick = () => sendAnswer(optionIndex, button);
+        document.getElementById("options").appendChild(button);
     });
 }
 
 function renderLeaderboard(list) {
     document.getElementById("question").classList.add("hidden");
     document.getElementById("players").classList.add("hidden");
+
     const box = document.getElementById("leaderboard");
-    box.classList.remove("hidden");
     const sorted = [...list].sort((a, b) => b.exp - a.exp);
-    box.innerHTML = `<h2 class="text-2xl font-bold mb-4">🏆 Итоги</h2>`;
-    sorted.forEach((p, i) => {
-        const medal = ["🥇", "🥈", "🥉"][i] || `${i + 1}.`;
+
+    box.classList.remove("hidden");
+    box.innerHTML = `<h2 class="text-2xl font-bold mb-4">Итоги</h2>`;
+
+    sorted.forEach((player, index) => {
+        const medal = ["🥇", "🥈", "🥉"][index] || `${index + 1}.`;
         const row = document.createElement("div");
         row.className = "leaderboard-row";
         row.innerHTML = `
             <div class="flex items-center gap-3">
                 <span class="text-2xl">${medal}</span>
-                <span class="text-2xl">${p.avatar}</span>
-                <span class="font-bold">${p.name}</span>
+                <span class="text-2xl">${player.avatar}</span>
+                <span class="font-bold">${player.name}</span>
             </div>
-            <span class="text-xl font-bold score-text">${p.exp} exp</span>`;
+            <span class="text-xl font-bold score-text">${player.exp} exp</span>
+        `;
         box.appendChild(row);
     });
 }
 
-// ── Chat ────────────────────────────────────────────────
-function escapeHtml(s) {
-    return String(s)
+function escapeHtml(value) {
+    return String(value)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
@@ -140,50 +150,55 @@ function escapeHtml(s) {
 function appendChatMessage(player, text) {
     const box = document.getElementById("chat-messages");
     if (!box) return;
-    const div = document.createElement("div");
-    div.className = "chat-msg";
-    div.innerHTML =
+
+    const message = document.createElement("div");
+    message.className = "chat-msg";
+    message.innerHTML =
         `<span>${escapeHtml(player.avatar)}</span>` +
         `<span class="chat-msg-name">${escapeHtml(player.name)}:</span>` +
         `<span class="chat-msg-text">${escapeHtml(text)}</span>`;
-    box.appendChild(div);
+
+    box.appendChild(message);
     box.scrollTop = box.scrollHeight;
 }
 
 function sendChat() {
     const input = document.getElementById("chat-input");
     const text = input.value.trim();
+
     if (!text) return;
-    wsSend({type: "send_message", text});
+
+    wsSend({ type: "send_message", text });
     input.value = "";
 }
 
 document.getElementById("chat-send").onclick = sendChat;
-document.getElementById("chat-input").addEventListener("keydown", e => {
-    if (e.key === "Enter") sendChat();
+document.getElementById("chat-input").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") sendChat();
 });
-// ────────────────────────────────────────────────────────
-
-let myAnswer = null;
 
 function revealAnswer(correctIndex) {
     const buttons = document.querySelectorAll("#options button");
-    buttons.forEach((b, i) => {
-        b.disabled = true;
-        if (i === correctIndex) {
-            b.classList.remove("selected");
-            b.classList.add("correct");
-        } else if (i === myAnswer) {
-            b.classList.add("wrong");
+    buttons.forEach((button, index) => {
+        button.disabled = true;
+        if (index === correctIndex) {
+            button.classList.remove("selected");
+            button.classList.add("correct");
+        } else if (index === myAnswer) {
+            button.classList.add("wrong");
         }
     });
 }
 
-function sendAnswer(i, btn) {
+function sendAnswer(index, button) {
     if (answered) return;
+
     answered = true;
-    myAnswer = i;
-    wsSend({type: "answer", option_index: i});
-    document.querySelectorAll("#options button").forEach(x => x.disabled = true);
-    btn.classList.add("selected");
+    myAnswer = index;
+    wsSend({ type: "answer", option_index: index });
+
+    document.querySelectorAll("#options button").forEach((item) => {
+        item.disabled = true;
+    });
+    button.classList.add("selected");
 }

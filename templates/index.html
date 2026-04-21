@@ -2,38 +2,42 @@
 {% block title %}Phys-Dev Quiz{% endblock %}
 {% block content %}
 
-<h1 class="text-3xl md:text-5xl font-bold mb-4 text-center" style="color: var(--green-main); letter-spacing: 0.1em;">ВИКТОРИНА</h1>
-<p class="text-xs md:text-sm mb-8 text-center text-muted" style="letter-spacing: 0.15em; text-transform: uppercase;">ПОСОЛЬСТВО Game.dev & LatticeLab</p>
+<section>
+    <h1 class="text-3xl text-center md:text-5xl font-bold mb-4" style="color: var(--green-main); letter-spacing: 0.1em;">ВИКТОРИНА</h1>
+    <p class="text-xs md:text-sm mb-8 text-center text-muted" style="letter-spacing: 0.15em; text-transform: uppercase;">Сообщество Game.dev &amp; LatticeLab</p>
+</section>
 
 <div class="login-wrap">
-<div class="card">
-    <h2 class="text-xl md:text-2xl mb-6 text-center" style="color: var(--green-main); letter-spacing: 0.1em; text-transform: uppercase;">Войти в комнату</h2>
-    <input id="code" placeholder="Пароль комнаты" class="input">
-    <input id="name" placeholder="Ваше имя" class="input">
-    <p class="text-sm text-muted text-center" style="margin-top: 1.5rem; margin-bottom: 1rem; letter-spacing: 0.1em; text-transform: uppercase;">Выбор аватарки</p>
-    <div class="avatar-row">
-        <button class="avatar-btn" data-avatar="🦊">🦊</button>
-        <button class="avatar-btn" data-avatar="🐼">🐼</button>
-        <button class="avatar-btn" data-avatar="🐸">🐸</button>
-        <button class="avatar-btn" data-avatar="🦁">🦁</button>
-        <button class="avatar-btn" data-avatar="👾">👾</button>
-        <button class="avatar-btn" data-avatar="🐧">🐧</button>
-        <button class="avatar-btn" data-avatar="🐺">🐺</button>
-        <button class="avatar-btn" data-avatar="🦝">🦝</button>
-        <button class="avatar-btn" data-avatar="👽">👽</button>
-        <button class="avatar-btn" data-avatar="🦄">🦄</button>
-        <button class="avatar-btn" data-avatar="🐲">🐲</button>
-        <button class="avatar-btn" data-avatar="🦐">🦐</button>
+    <div class="card">
+        <h2 class="text-xl md:text-2xl mb-6 text-center" style="color: var(--green-main); letter-spacing: 0.1em; text-transform: uppercase;">Войти в комнату</h2>
+        <input id="code" placeholder="Код комнаты" class="input" maxlength="6" autocomplete="off">
+        <input id="name" placeholder="Ваше имя" class="input" maxlength="30" autocomplete="nickname">
+
+        <p class="text-sm text-muted text-center" style="margin-top: 1.5rem; margin-bottom: 1rem; letter-spacing: 0.1em; text-transform: uppercase;">Выбор аватарки</p>
+        <div class="avatar-row">
+            <button type="button" class="avatar-btn selected" data-avatar="🦊">🦊</button>
+            <button type="button" class="avatar-btn" data-avatar="🐼">🐼</button>
+            <button type="button" class="avatar-btn" data-avatar="🐸">🐸</button>
+            <button type="button" class="avatar-btn" data-avatar="🦁">🦁</button>
+            <button type="button" class="avatar-btn" data-avatar="👾">👾</button>
+            <button type="button" class="avatar-btn" data-avatar="🐧">🐧</button>
+            <button type="button" class="avatar-btn" data-avatar="🐺">🐺</button>
+            <button type="button" class="avatar-btn" data-avatar="🦉">🦉</button>
+            <button type="button" class="avatar-btn" data-avatar="👽">👽</button>
+            <button type="button" class="avatar-btn" data-avatar="🦄">🦄</button>
+            <button type="button" class="avatar-btn" data-avatar="🐲">🐲</button>
+            <button type="button" class="avatar-btn" data-avatar="🦀">🦀</button>
+        </div>
+
+        <div class="text-center" style="margin-top: 1.5rem;">
+            <button id="join-btn" type="button" class="btn btn-sm btn-primary">Войти</button>
+        </div>
     </div>
-    <div class="text-center" style="margin-top: 1.5rem;">
-        <button id="join-btn" class="btn btn-sm btn-primary">Войти</button>
-    </div>
-</div>
 </div>
 
 {% if request.user.is_superuser %}
 <div class="text-center">
-    <button id="host-btn" class="btn btn-sm btn-accent">Создать</button>
+    <button id="host-btn" type="button" class="btn btn-sm btn-accent">Создать комнату</button>
 </div>
 {% endif %}
 
@@ -42,27 +46,36 @@
 {% block extra_js %}
 <script>
 let selectedAvatar = "🦊";
-document.querySelectorAll(".avatar-btn").forEach(b => {
-    b.onclick = () => {
-        selectedAvatar = b.dataset.avatar;
-        document.querySelectorAll(".avatar-btn").forEach(x => x.classList.remove("selected"));
-        b.classList.add("selected");
+
+document.querySelectorAll(".avatar-btn").forEach((button) => {
+    button.onclick = () => {
+        selectedAvatar = button.dataset.avatar;
+        document.querySelectorAll(".avatar-btn").forEach((item) => item.classList.remove("selected"));
+        button.classList.add("selected");
     };
 });
 
 document.getElementById("join-btn").onclick = () => {
     const code = document.getElementById("code").value.toUpperCase().trim();
     const name = document.getElementById("name").value.trim();
-    if (code.length !== 6 || !name) { alert("Заполни код и имя"); return; }
+
+    if (code.length !== 6 || !name) {
+        alert("Заполните код комнаты и имя");
+        return;
+    }
+
     sessionStorage.setItem("name", name);
     sessionStorage.setItem("avatar", selectedAvatar);
     window.location.href = `/lobby/${code}/`;
 };
 
-document.getElementById("host-btn").onclick = async () => {
-    const r = await fetch("/api/new-lobby/", {method: "POST"});
-    const data = await r.json();
-    window.location.href = `/host/${data.code}/`;
-};
+const hostButton = document.getElementById("host-btn");
+if (hostButton) {
+    hostButton.onclick = async () => {
+        const response = await fetch("/api/new-lobby/", { method: "POST" });
+        const data = await response.json();
+        window.location.href = `/host/${data.code}/`;
+    };
+}
 </script>
 {% endblock %}
