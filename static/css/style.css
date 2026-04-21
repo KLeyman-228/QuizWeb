@@ -3,39 +3,46 @@
 }
 
 :root {
-    /* Фоны */
-    --bg-page:        #0D1B2A;   /* тёмный фон страницы  */
-    --bg-card:        #1B263B;   /* карточки             */
-    --bg-input:       #26385a;   /* поля / варианты      */
-    --bg-input-hover: #023E8A;
-    --bg-avarar:      #2c374aaf;   /* ховер полей          */
 
-    /* Текст */
-    --text-main:  #f8fafc;
-    --text-muted: #94a3b8;
-    --text-score: #00ffea;   /* синий для очков */
-    --text-select: #0077B6;
+    --bg-main: #040505;       
+    --bg-secondary: #0a0f0d;  
+    --bg-card: rgba(10, 20, 15, 0.7);
+    --bg-glass: rgba(20, 40, 30, 0.35);
 
-    /* Цвета кнопок */
-    --color-primary:       #023E8A;
-    --color-primary-hover: #0077B6;
-    --color-success:       #79a512;
-    --color-success-hover: #91c41a;
-    --color-danger:        #9b1212;
-    --color-danger-hover:  #d00000;
-    --color-accent:        #d87300;
-    --color-accent-hover:  #b66d00;
+    --grid-color: rgba(46, 213, 115, 0.07);
+    --border-color: rgba(46, 213, 115, 0.25);
 
-    /* Скругления */
-    --radius:    2rem;   /* карточки */
-    --radius-sm: 0.575rem;  /* кнопки / поля */
+    --green-main: #2ed573;
+    --green-soft: #7bed9f;
+    --green-dark: #1e9e55;
+
+    --glow: 0 0 8px rgba(46, 213, 115, 0.4),
+            0 0 20px rgba(46, 213, 115, 0.15);
+
+    --text-main: #e6f1ec;
+    --text-muted: #6b8f7d;
+    --text-dim: #3e5c4f;
+
+    --success: #2ed573;
+    --success-bg: rgba(46, 213, 115, 0.15);
+
+    --error: #ff4757;
+    --error-bg: rgba(255, 71, 87, 0.15);
+
+    --warning: #ffa502;
+    --warning-bg: rgba(255, 165, 2, 0.15);
+
+    --accent: #00e5ff;
+    --accent-soft: rgba(0, 229, 255, 0.2);
+
+
+    --radius: 1.2rem;
+    --radius-sm: 0.6rem;
 }
 
-/* ===================================================
-   Базовая раскладка
-   =================================================== */
+
 body {
-    background: #0f1111;
+    background: var(--bg-main);
     color: var(--text-main);
     background-color: #050606;
     --color: rgba(37, 148, 83, 0.08);
@@ -86,17 +93,15 @@ body {
 
 .community {
   width: 320px;
-  border-right: 1px solid rgba(46,213,115,0.2);
-  background-color: #0b0f0d;
+  border-right: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-/* ===================================================
-   Карточки
-   =================================================== */
+
 .card {
     max-width: 600px;
     width: 100%;
@@ -108,8 +113,10 @@ body {
 }
 
 .discord-card {
-  background: rgba(46,213,115,0.05);
-  border: 1px solid rgba(46,213,115,0.2);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  box-shadow: var(--glow);
   padding: 15px;
   transition: 0.2s;
 }
