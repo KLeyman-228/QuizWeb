@@ -13,20 +13,20 @@
         <input id="code" placeholder="Код комнаты" class="input" maxlength="6" autocomplete="off">
         <input id="name" placeholder="Ваше имя" class="input" maxlength="30" autocomplete="nickname">
 
-        <p class="text-sm text-muted text-center" style="margin-top: 1.5rem; margin-bottom: 1rem; letter-spacing: 0.1em; text-transform: uppercase;">Terminal ID</p>
+        <p class="text-sm text-muted text-center" style="margin-top: 1.5rem; margin-bottom: 1rem; letter-spacing: 0.1em; text-transform: uppercase;">Выбор аватарки</p>
         <div class="avatar-row">
-            <button type="button" class="avatar-btn selected" data-avatar="[A-01]">[A-01]</button>
-            <button type="button" class="avatar-btn" data-avatar="[B-02]">[B-02]</button>
-            <button type="button" class="avatar-btn" data-avatar="[C-03]">[C-03]</button>
-            <button type="button" class="avatar-btn" data-avatar="[D-04]">[D-04]</button>
-            <button type="button" class="avatar-btn" data-avatar="[E-05]">[E-05]</button>
-            <button type="button" class="avatar-btn" data-avatar="[F-06]">[F-06]</button>
-            <button type="button" class="avatar-btn" data-avatar="[G-07]">[G-07]</button>
-            <button type="button" class="avatar-btn" data-avatar="[H-08]">[H-08]</button>
-            <button type="button" class="avatar-btn" data-avatar="[I-09]">[I-09]</button>
-            <button type="button" class="avatar-btn" data-avatar="[J-10]">[J-10]</button>
-            <button type="button" class="avatar-btn" data-avatar="[K-11]">[K-11]</button>
-            <button type="button" class="avatar-btn" data-avatar="[L-12]">[L-12]</button>
+            <button type="button" class="avatar-btn selected" data-avatar="🦊">🦊</button>
+            <button type="button" class="avatar-btn" data-avatar="🐼">🐼</button>
+            <button type="button" class="avatar-btn" data-avatar="🐸">🐸</button>
+            <button type="button" class="avatar-btn" data-avatar="🦃">🦃</button>
+            <button type="button" class="avatar-btn" data-avatar="👾">👾</button>
+            <button type="button" class="avatar-btn" data-avatar="🐧">🐧</button>
+            <button type="button" class="avatar-btn" data-avatar="🐺">🐺</button>
+            <button type="button" class="avatar-btn" data-avatar="🦉">🦉</button>
+            <button type="button" class="avatar-btn" data-avatar="👽">👽</button>
+            <button type="button" class="avatar-btn" data-avatar="🦄">🦄</button>
+            <button type="button" class="avatar-btn" data-avatar="🐲">🐲</button>
+            <button type="button" class="avatar-btn" data-avatar="🦀">🦀</button>
         </div>
 
         <div class="text-center" style="margin-top: 1.5rem;">
@@ -45,7 +45,7 @@
 
 {% block extra_js %}
 <script>
-let selectedAvatar = "[A-01]";
+let selectedAvatar = "🦊";
 
 document.querySelectorAll(".avatar-btn").forEach((button) => {
     button.onclick = () => {
