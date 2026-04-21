@@ -161,56 +161,54 @@ textarea {
     justify-content: center;
     height: 64px;
     background: linear-gradient(120deg, rgba(46, 213, 115, 0.75), rgba(46, 213, 115, 0.1));
+    overflow: hidden;
 }
 
-.discord-banner-placeholder {
-    color: rgba(255, 255, 255, 0.58);
-    font-size: 0.72rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+.discord-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .discord-card-content {
-    padding: 0.75rem;
+    padding: 0.9rem 0.75rem 0.75rem;
 }
 
 .discord-profile {
     display: flex;
     align-items: center;
     gap: 0.7rem;
-    margin-top: -1.55rem;
+    margin-top: -1rem;
+    margin-bottom: 0.35rem;
 }
 
 .discord-avatar {
     width: 46px;
     height: 46px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     flex-shrink: 0;
     border: 2px solid var(--green-main);
     background: #060707;
-    color: var(--green-main);
-    font-size: 0.9rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
+    object-fit: cover;
     box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.95);
 }
 
 .discord-meta {
     min-width: 0;
+    padding-top: 0.35rem;
 }
 
 .discord-card h3 {
     margin: 0 0 0.35rem;
     font-size: 0.95rem;
     color: var(--green-main);
+    line-height: 1.1;
 }
 
 .discord-card p {
     margin: 0;
     color: var(--text-muted);
     font-size: 0.78rem;
+    line-height: 1.25;
 }
 
 .discord-highlight {
