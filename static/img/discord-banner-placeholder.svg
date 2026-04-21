@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="560" height="160" viewBox="0 0 560 160" fill="none">
-  <rect width="560" height="160" fill="#1FAE5B"/>
-  <rect x="1" y="1" width="558" height="158" stroke="#7BFFA9" stroke-opacity="0.35" stroke-width="2"/>
-  <path d="M0 118L97 74L176 106L272 46L358 90L451 38L560 92V160H0V118Z" fill="#0A0C0C" fill-opacity="0.34"/>
-  <path d="M0 140L76 108L159 128L235 84L331 118L425 73L560 129V160H0V140Z" fill="#0A0C0C" fill-opacity="0.22"/>
-  <text x="280" y="70" fill="#D7FFE6" font-family="Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="3" text-anchor="middle">BANNER PLACEHOLDER</text>
-  <text x="280" y="98" fill="#0A0C0C" font-family="Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="2" text-anchor="middle">REPLACE WITH YOUR IMAGE</text>
-</svg>
