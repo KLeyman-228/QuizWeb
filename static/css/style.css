@@ -78,8 +78,9 @@ textarea {
 }
 
 .container {
+    --sidebar-width: 248px;
     display: grid;
-    grid-template-columns: 280px minmax(0, 1fr);
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
     min-height: 100vh;
 }
 
@@ -87,27 +88,27 @@ textarea {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    padding: 1.1rem 0.9rem;
-    border-right: 1px solid var(--border-color);
-    background: var(--bg-secondary);
+    padding: 0.85rem 0.7rem;
+    border-right: 1px solid rgba(46, 213, 115, 0.16);
+    background: rgba(13, 16, 16, 0.82);
 }
 
 .community-panel {
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
-    padding: 0.9rem;
-    border: 1px solid rgba(46, 213, 115, 0.22);
-    background: rgba(46, 213, 115, 0.05);
-    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.9);
+    gap: 0.65rem;
+    padding: 0.72rem;
+    border: 1px solid rgba(46, 213, 115, 0.14);
+    background: rgba(46, 213, 115, 0.025);
+    box-shadow: none;
 }
 
 .community h2 {
     margin: 0;
     padding: 0;
-    color: var(--green-main);
-    font-size: 0.82rem;
-    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
 }
 
@@ -129,6 +130,10 @@ textarea {
     gap: 1rem;
 }
 
+.page-container-landing {
+    transform: translateX(calc(var(--sidebar-width) / -2));
+}
+
 .card {
     width: 100%;
     padding: clamp(1rem, 2.3vw, 1.7rem);
@@ -142,16 +147,16 @@ textarea {
 .discord-card {
     width: 100%;
     overflow: hidden;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.58);
+    border: 1px solid rgba(46, 213, 115, 0.14);
     border-radius: 0;
     box-shadow: none;
     transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
 }
 
 .discord-card:hover {
-    transform: translateY(-3px);
-    background: rgba(46, 213, 115, 0.1);
+    transform: translateY(-2px);
+    background: rgba(46, 213, 115, 0.07);
     border-color: var(--border-strong);
 }
 
@@ -159,9 +164,10 @@ textarea {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 64px;
+    height: 54px;
     background: linear-gradient(120deg, rgba(46, 213, 115, 0.75), rgba(46, 213, 115, 0.1));
     overflow: hidden;
+    opacity: 0.72;
 }
 
 .discord-banner img {
@@ -171,25 +177,25 @@ textarea {
 }
 
 .discord-card-content {
-    padding: 0.9rem 0.75rem 0.75rem;
+    padding: 0.72rem 0.68rem 0.68rem;
 }
 
 .discord-profile {
     display: flex;
     align-items: center;
-    gap: 0.7rem;
-    margin-top: -1rem;
+    gap: 0.55rem;
+    margin-top: -0.8rem;
     margin-bottom: 0.35rem;
 }
 
 .discord-avatar {
-    width: 46px;
-    height: 46px;
+    width: 40px;
+    height: 40px;
     flex-shrink: 0;
-    border: 2px solid var(--green-main);
+    border: 1px solid rgba(46, 213, 115, 0.65);
     background: #060707;
     object-fit: cover;
-    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.95);
+    box-shadow: none;
 }
 
 .discord-meta {
@@ -199,7 +205,7 @@ textarea {
 
 .discord-card h3 {
     margin: 0 0 0.35rem;
-    font-size: 0.95rem;
+    font-size: 0.88rem;
     color: var(--green-main);
     line-height: 1.1;
 }
@@ -207,17 +213,17 @@ textarea {
 .discord-card p {
     margin: 0;
     color: var(--text-muted);
-    font-size: 0.78rem;
+    font-size: 0.74rem;
     line-height: 1.25;
 }
 
 .discord-highlight {
-    margin-top: 0.8rem;
-    padding: 0.65rem 0.75rem;
-    border-left: 3px solid var(--green-main);
-    background: rgba(46, 213, 115, 0.08);
-    color: #d8e7df;
-    font-size: 0.74rem;
+    margin-top: 0.65rem;
+    padding: 0.55rem 0.65rem;
+    border-left: 2px solid rgba(46, 213, 115, 0.65);
+    background: rgba(46, 213, 115, 0.045);
+    color: #d3e2da;
+    font-size: 0.7rem;
     line-height: 1.45;
 }
 
@@ -225,9 +231,9 @@ textarea {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 0.5rem;
-    padding: 0.7rem 0.75rem 0.8rem;
-    border-top: 1px solid rgba(46, 213, 115, 0.12);
-    background: rgba(0, 0, 0, 0.2);
+    padding: 0.55rem 0.65rem 0.65rem;
+    border-top: 1px solid rgba(46, 213, 115, 0.08);
+    background: rgba(0, 0, 0, 0.12);
 }
 
 .discord-stat {
@@ -236,13 +242,13 @@ textarea {
 
 .discord-stat-number {
     color: var(--green-main);
-    font-size: 0.9rem;
+    font-size: 0.82rem;
     font-weight: 700;
 }
 
 .discord-stat-label {
     color: var(--text-dim);
-    font-size: 0.62rem;
+    font-size: 0.58rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
@@ -316,6 +322,20 @@ textarea {
 
 .btn-primary {
     --button-color: var(--green-main);
+}
+
+.login-wrap .btn-primary {
+    min-width: 11.5rem;
+    padding-inline: 1.55rem;
+    background: linear-gradient(135deg, #2ed573 0%, #7bed9f 100%);
+    color: #04110a;
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.06),
+        6px 6px 0 rgba(0, 0, 0, 0.88);
+}
+
+.login-wrap .btn-primary:hover {
+    background: linear-gradient(135deg, #47e68a 0%, #a7f8bc 100%);
 }
 
 .btn-success {
@@ -680,6 +700,10 @@ textarea {
 @media (max-width: 900px) {
     .container {
         grid-template-columns: 1fr;
+    }
+
+    .page-container-landing {
+        transform: none;
     }
 
     .community {
