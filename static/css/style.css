@@ -1,38 +1,33 @@
 * {
     box-sizing: border-box;
-    font-family: "Rubik", sans-serif;
+    font-family: "Consolas", "Lucida Console", "Courier New", monospace;
 }
 
 :root {
-    --bg-main: #0a0c0c;
-    --bg-secondary: #0d1010;
-    --bg-card: rgba(0, 0, 0, 0.84);
-    --bg-card-soft: rgba(46, 213, 115, 0.06);
-    --bg-input: rgba(0, 0, 0, 0.8);
-    --bg-input-hover: rgba(46, 213, 115, 0.1);
-    --bg-avatar: rgba(46, 213, 115, 0.08);
-
-    --grid-color: rgba(92, 92, 92, 0.14);
-    --border-color: rgba(46, 213, 115, 0.28);
-    --border-strong: #2ed573;
-
-    --green-main: #2ed573;
-    --green-soft: #7bed9f;
-    --green-dark: #1e9e55;
-
-    --text-main: #e6f1ec;
-    --text-muted: #8aa595;
-    --text-dim: #577161;
-    --text-score: #7bed9f;
-
-    --success: #2ed573;
-    --warning: #ffa502;
-    --error: #ff4757;
-    --accent: #ffd700;
-
+    --bg-main: #020402;
+    --bg-secondary: #030603;
+    --bg-card: rgba(1, 8, 1, 0.96);
+    --bg-card-soft: rgba(9, 255, 0, 0.06);
+    --bg-input: #020502;
+    --bg-input-hover: rgba(255, 0, 153, 0.08);
+    --bg-avatar: rgba(0, 229, 255, 0.08);
+    --grid-color: rgba(0, 255, 102, 0.1);
+    --border-color: rgba(0, 255, 102, 0.38);
+    --border-strong: #00ff66;
+    --green-main: #00ff66;
+    --green-soft: #7dff3a;
+    --green-dark: #00b347;
+    --text-main: #d7ffe8;
+    --text-muted: #72c88d;
+    --text-dim: #3e8b57;
+    --text-score: #f5ff3b;
+    --success: #00ff66;
+    --warning: #f5ff3b;
+    --error: #ff225e;
+    --accent: #00e5ff;
     --radius: 0;
     --radius-sm: 0;
-    --shadow-soft: 6px 6px 0 rgba(0, 0, 0, 0.95);
+    --shadow-soft: none;
 }
 
 html {
@@ -40,8 +35,10 @@ html {
 }
 
 body {
+    position: relative;
     min-height: 100%;
     margin: 0;
+    overflow-x: hidden;
     color: var(--text-main);
     background-color: var(--bg-main);
     --color: var(--grid-color);
@@ -71,6 +68,61 @@ body {
     background-size: 50px 50px;
 }
 
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.02) 0,
+        rgba(255, 255, 255, 0.02) 1px,
+        rgba(0, 0, 0, 0) 1px,
+        rgba(0, 0, 0, 0) 4px
+    );
+    mix-blend-mode: screen;
+    opacity: 0.3;
+    animation: screen-flicker 0.16s steps(2) infinite;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(90deg, rgba(255, 0, 153, 0.05), transparent 35%, rgba(0, 229, 255, 0.05)),
+        linear-gradient(180deg, rgba(0, 255, 102, 0.04), transparent 45%);
+    opacity: 0.55;
+}
+
+@keyframes screen-flicker {
+    0%, 100% {
+        opacity: 0.22;
+    }
+    50% {
+        opacity: 0.35;
+    }
+}
+
+@keyframes glitch-shift {
+    0%, 100% {
+        transform: translate(0, 0);
+    }
+    20% {
+        transform: translate(-1px, 0);
+    }
+    40% {
+        transform: translate(1px, 1px);
+    }
+    60% {
+        transform: translate(1px, -1px);
+    }
+    80% {
+        transform: translate(-1px, 1px);
+    }
+}
+
 button,
 input,
 textarea {
@@ -89,23 +141,31 @@ textarea {
     gap: 1rem;
     padding: 1.1rem 0.9rem;
     border-right: 1px solid var(--border-color);
-    background: var(--bg-secondary);
+    background: linear-gradient(180deg, rgba(0, 10, 0, 0.98), rgba(0, 0, 0, 0.98));
 }
 
 .community-panel {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 0.8rem;
     padding: 0.9rem;
-    border: 1px solid rgba(46, 213, 115, 0.22);
-    background: rgba(46, 213, 115, 0.05);
-    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.9);
+    border: 1px solid rgba(0, 255, 102, 0.22);
+    background: rgba(0, 12, 0, 0.9);
+}
+
+.community-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border: 1px solid rgba(255, 0, 153, 0.28);
 }
 
 .community h2 {
     margin: 0;
     padding: 0;
-    color: var(--green-main);
+    color: var(--accent);
     font-size: 0.82rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
@@ -121,22 +181,31 @@ textarea {
     width: min(100%, 900px);
     min-height: 100vh;
     margin: 0 auto;
-    padding: 1.6rem clamp(0.9rem, 2.4vw, 1.5rem);
+    padding: 2rem clamp(0.9rem, 2.4vw, 1.5rem) 2.4rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    align-items: stretch;
+    justify-content: flex-start;
     gap: 1rem;
 }
 
 .card {
+    position: relative;
     width: 100%;
+    overflow: hidden;
     padding: clamp(1rem, 2.3vw, 1.7rem);
     background: var(--bg-card);
-    border: 1px solid rgba(46, 213, 115, 0.34);
+    border: 1px solid rgba(0, 255, 102, 0.34);
     border-radius: var(--radius);
     box-shadow: var(--shadow-soft);
-    backdrop-filter: blur(8px);
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(0, 255, 102, 0.05), transparent 30%, transparent 70%, rgba(255, 0, 153, 0.04));
 }
 
 .discord-card {
@@ -146,13 +215,12 @@ textarea {
     border: 1px solid var(--border-color);
     border-radius: 0;
     box-shadow: none;
-    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    transition: border-color 0.1s steps(2), background 0.1s steps(2);
 }
 
 .discord-card:hover {
-    transform: translateY(-3px);
-    background: rgba(46, 213, 115, 0.1);
-    border-color: var(--border-strong);
+    background: rgba(0, 255, 102, 0.08);
+    border-color: var(--accent);
 }
 
 .discord-banner {
@@ -160,7 +228,7 @@ textarea {
     align-items: center;
     justify-content: center;
     height: 64px;
-    background: linear-gradient(120deg, rgba(46, 213, 115, 0.75), rgba(46, 213, 115, 0.1));
+    background: linear-gradient(120deg, rgba(0, 255, 102, 0.85), rgba(255, 0, 153, 0.35));
     overflow: hidden;
 }
 
@@ -186,10 +254,11 @@ textarea {
     width: 46px;
     height: 46px;
     flex-shrink: 0;
-    border: 2px solid var(--green-main);
+    border: 1px solid var(--accent);
     background: #060707;
     object-fit: cover;
-    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.95);
+    image-rendering: pixelated;
+    filter: saturate(1.35) contrast(1.2);
 }
 
 .discord-meta {
@@ -199,9 +268,10 @@ textarea {
 
 .discord-card h3 {
     margin: 0 0 0.35rem;
-    font-size: 0.95rem;
     color: var(--green-main);
+    font-size: 0.95rem;
     line-height: 1.1;
+    text-transform: uppercase;
 }
 
 .discord-card p {
@@ -214,8 +284,8 @@ textarea {
 .discord-highlight {
     margin-top: 0.8rem;
     padding: 0.65rem 0.75rem;
-    border-left: 3px solid var(--green-main);
-    background: rgba(46, 213, 115, 0.08);
+    border-left: 3px solid var(--accent);
+    background: rgba(255, 0, 153, 0.08);
     color: #d8e7df;
     font-size: 0.74rem;
     line-height: 1.45;
@@ -226,7 +296,7 @@ textarea {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.5rem;
     padding: 0.7rem 0.75rem 0.8rem;
-    border-top: 1px solid rgba(46, 213, 115, 0.12);
+    border-top: 1px solid rgba(0, 255, 102, 0.12);
     background: rgba(0, 0, 0, 0.2);
 }
 
@@ -252,25 +322,25 @@ textarea {
     width: 100%;
     margin-bottom: 1rem;
     padding: 0.8rem 0.9rem;
-    border: 1px solid rgba(46, 213, 115, 0.3);
+    border: 1px solid rgba(0, 255, 102, 0.3);
     border-radius: var(--radius-sm);
     background: var(--bg-input);
     color: var(--text-main);
     font-size: 0.92rem;
+    text-transform: uppercase;
     outline: none;
-    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    transition: background 0.08s steps(2), border-color 0.08s steps(2), color 0.08s steps(2);
 }
 
 .input::placeholder {
-    color: rgba(230, 241, 236, 0.45);
+    color: rgba(215, 255, 232, 0.45);
 }
 
 .input:hover,
 .input:focus {
     background: var(--bg-input-hover);
-    border-color: var(--border-strong);
-    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.95);
-    transform: translate(-1px, -1px);
+    border-color: var(--accent);
+    color: var(--accent);
 }
 
 .btn {
@@ -281,27 +351,22 @@ textarea {
     gap: 0.5rem;
     min-height: 42px;
     padding: 0.72rem 1.2rem;
-    border: none;
+    border: 1px solid var(--button-color);
     border-radius: var(--radius-sm);
-    background: var(--button-color);
-    color: #050606;
+    background: rgba(1, 8, 1, 0.98);
+    color: var(--button-color);
     font-size: 0.84rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    transform: skewX(-10deg);
     cursor: pointer;
-    box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.88);
-    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    transition: background 0.08s steps(2), color 0.08s steps(2), border-color 0.08s steps(2);
 }
 
 .btn:hover {
-    transform: skewX(-10deg) translate(-2px, -2px);
-    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.95);
-}
-
-.btn > * {
-    transform: skewX(10deg);
+    background: var(--button-color);
+    color: #010401;
 }
 
 .btn-sm {
@@ -324,31 +389,14 @@ textarea {
 
 .btn-danger {
     --button-color: var(--error);
-    color: #fff;
 }
 
 .btn-accent {
     --button-color: var(--accent);
-    background: var(--accent);
-    color: #111;
-    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.95);
 }
 
-.btn-accent:hover {
-    background: #ffe34a;
-    color: #000;
-}
-
-.login-wrap {
-    width: min(100%, 31rem);
-    margin: 0 auto;
-}
-
-.hero-block {
-    width: min(100%, 31rem);
-    margin: 0 auto;
-}
-
+.login-wrap,
+.hero-block,
 .compact-action {
     width: min(100%, 31rem);
     margin: 0 auto;
@@ -358,34 +406,36 @@ textarea {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 0.45rem;
-    max-width: 19rem;
+    max-width: 24rem;
     margin: 0 auto 1rem;
 }
 
 .avatar-btn {
     width: 100%;
+    min-height: 52px;
     aspect-ratio: 1;
     padding: 0.2rem;
-    border: 1px solid rgba(46, 213, 115, 0.32);
-    border-radius: 0.9rem;
+    border: 1px solid rgba(0, 255, 102, 0.32);
+    border-radius: 0;
     background: var(--bg-avatar);
-    color: inherit;
+    color: var(--accent);
     cursor: pointer;
-    font-size: 1.15rem;
-    transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    transition: background 0.08s steps(2), border-color 0.08s steps(2), color 0.08s steps(2);
 }
 
 .avatar-btn:hover {
-    transform: translateY(-2px);
-    border-color: var(--border-strong);
-    background: rgba(46, 213, 115, 0.16);
-    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.95);
+    border-color: var(--accent);
+    background: rgba(255, 0, 153, 0.12);
+    color: var(--green-main);
 }
 
 .avatar-btn.selected {
     border-color: var(--green-main);
-    background: rgba(46, 213, 115, 0.22);
-    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.95);
+    background: rgba(0, 255, 102, 0.18);
+    color: var(--green-main);
 }
 
 .players-grid,
@@ -408,6 +458,7 @@ textarea {
     letter-spacing: 0.22em;
     line-height: 1;
     text-indent: 0.22em;
+    animation: glitch-shift 0.9s steps(2) infinite;
 }
 
 .lobby-waiting-row {
@@ -421,45 +472,34 @@ textarea {
 .lobby-dot {
     width: 10px;
     height: 10px;
-    border: 2px solid rgba(46, 213, 115, 0.44);
-    border-radius: 999px;
-    background: var(--success);
-    animation: pulse-dot 1.6s ease-in-out infinite;
-}
-
-@keyframes pulse-dot {
-    0%,
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-    50% {
-        opacity: 0.45;
-        transform: scale(0.72);
-    }
+    border: 1px solid rgba(245, 255, 59, 0.6);
+    background: var(--warning);
+    animation: screen-flicker 0.4s steps(2) infinite;
 }
 
 .player-card,
 .player-card-sm {
-    border: 1px solid rgba(46, 213, 115, 0.3);
-    border-radius: 1rem;
+    border: 1px solid rgba(0, 255, 102, 0.3);
     background: var(--bg-card);
     text-align: center;
 }
 
 .player-card {
     padding: 0.85rem 0.7rem;
-    transition: transform 0.18s ease, border-color 0.18s ease;
+    transition: border-color 0.08s steps(2), background 0.08s steps(2);
 }
 
 .player-card:hover {
-    transform: translateY(-2px);
-    border-color: var(--border-strong);
+    border-color: var(--accent);
+    background: rgba(0, 255, 102, 0.08);
 }
 
 .player-card-avatar {
     margin-bottom: 0.45rem;
-    font-size: 1.9rem;
+    color: var(--accent);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
     line-height: 1;
 }
 
@@ -477,7 +517,9 @@ textarea {
 }
 
 .player-card-sm .text-2xl {
-    font-size: 1.35rem;
+    color: var(--accent);
+    font-size: 1rem;
+    letter-spacing: 0.1em;
 }
 
 .player-card-sm .text-sm {
@@ -492,12 +534,12 @@ textarea {
 .answer-option {
     width: 100%;
     padding: 0.85rem 0.95rem;
-    border: 1px solid rgba(46, 213, 115, 0.3);
+    border: 1px solid rgba(0, 255, 102, 0.3);
     border-radius: var(--radius-sm);
     background:
-        radial-gradient(circle, rgba(46, 213, 116, 0.2) 0%, transparent 95%),
-        linear-gradient(rgba(46, 213, 116, 0.05) 1px, transparent 1px),
-        linear-gradient(to right, rgba(46, 213, 116, 0.05) 1px, transparent 1px);
+        radial-gradient(circle, rgba(0, 255, 102, 0.18) 0%, transparent 95%),
+        linear-gradient(rgba(0, 255, 102, 0.05) 1px, transparent 1px),
+        linear-gradient(to right, rgba(0, 255, 102, 0.05) 1px, transparent 1px);
     background-size: cover, 15px 15px, 15px 15px;
     color: var(--green-main);
     font-size: 0.88rem;
@@ -507,15 +549,15 @@ textarea {
     text-transform: uppercase;
     cursor: pointer;
     box-shadow: none;
-    transition: background-size 0.15s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+    transition: background-size 0.08s steps(2), background-color 0.08s steps(2), color 0.08s steps(2), border-color 0.08s steps(2);
 }
 
 .answer-option:hover:not(:disabled),
 .answer-option.selected {
     background-size: cover, 10px 10px, 10px 10px;
-    background-color: rgba(46, 213, 115, 0.12);
-    color: #c8ffd8;
-    transform: translateX(5px);
+    background-color: rgba(255, 0, 153, 0.14);
+    color: #ffffff;
+    border-color: var(--accent);
 }
 
 .answer-option.correct {
@@ -537,20 +579,19 @@ textarea {
     gap: 1rem;
     padding: 0.85rem 0.95rem;
     margin-bottom: 0.75rem;
-    border: 1px solid rgba(46, 213, 115, 0.28);
+    border: 1px solid rgba(0, 255, 102, 0.28);
     border-radius: var(--radius-sm);
     background: var(--bg-card-soft);
     box-shadow: none;
-    transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+    transition: border-color 0.08s steps(2), background 0.08s steps(2);
 }
 
 .answer-option-host:hover {
-    border-color: var(--border-strong);
-    transform: translateX(4px);
+    border-color: var(--accent);
 }
 
 .answer-option-host.correct {
-    background: rgba(46, 213, 115, 0.14);
+    background: rgba(0, 255, 102, 0.14);
     border-color: var(--success);
 }
 
@@ -566,8 +607,7 @@ textarea {
     gap: 1rem;
     padding: 0.8rem 0.9rem;
     margin-bottom: 0.75rem;
-    border: 1px solid rgba(46, 213, 115, 0.28);
-    border-radius: var(--radius-sm);
+    border: 1px solid rgba(0, 255, 102, 0.28);
     background: var(--bg-card-soft);
     box-shadow: none;
 }
@@ -618,6 +658,7 @@ textarea {
     font-size: clamp(1.55rem, 3vw, 2.1rem);
     letter-spacing: 0.12em;
     word-break: break-word;
+    animation: glitch-shift 0.9s steps(2) infinite;
 }
 
 .host-actions {
@@ -626,18 +667,61 @@ textarea {
     flex-wrap: wrap;
 }
 
+.terminal-chat {
+    border-color: var(--accent);
+}
+
+.terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(0, 255, 102, 0.2);
+    color: var(--accent);
+    font-size: 0.74rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.terminal-dot {
+    width: 9px;
+    height: 9px;
+    border: 1px solid var(--warning);
+    background: var(--warning);
+    animation: screen-flicker 0.4s steps(2) infinite;
+}
+
+.terminal-title,
+.terminal-label {
+    text-shadow: 1px 0 rgba(255, 0, 153, 0.35);
+}
+
 .chat-messages {
+    position: relative;
     min-height: 3rem;
-    max-height: 180px;
+    max-height: 260px;
     overflow-y: auto;
     margin-bottom: 1rem;
-    padding: 0.7rem;
+    padding: 0.85rem;
     display: flex;
     flex-direction: column;
     gap: 0.55rem;
-    border: 1px solid rgba(46, 213, 115, 0.22);
+    border: 1px solid rgba(0, 255, 102, 0.22);
     border-radius: var(--radius-sm);
-    background: rgba(0, 0, 0, 0.42);
+    background:
+        linear-gradient(180deg, rgba(0, 255, 102, 0.05), transparent 18%),
+        repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0, rgba(255, 255, 255, 0.03) 1px, transparent 1px, transparent 4px),
+        rgba(0, 0, 0, 0.72);
+}
+
+.chat-messages::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(90deg, rgba(255, 0, 153, 0.06), transparent 30%, rgba(0, 229, 255, 0.06));
+    opacity: 0.8;
 }
 
 .chat-msg {
@@ -645,15 +729,19 @@ textarea {
     align-items: baseline;
     gap: 0.45rem;
     flex-wrap: wrap;
+    padding-bottom: 0.45rem;
+    border-bottom: 1px dotted rgba(0, 255, 102, 0.12);
     font-size: 0.84rem;
     line-height: 1.45;
+    position: relative;
 }
 
 .chat-msg-name {
     flex-shrink: 0;
-    color: var(--green-main);
+    color: var(--accent);
     font-size: 0.76rem;
     font-weight: 700;
+    text-transform: uppercase;
 }
 
 .chat-msg-text {
@@ -674,7 +762,7 @@ textarea {
 
 .chat-input-row .btn {
     flex-shrink: 0;
-    min-width: 56px;
+    min-width: 84px;
 }
 
 @media (max-width: 900px) {
@@ -705,11 +793,10 @@ textarea {
 
     .card {
         padding: 1rem;
-        border-radius: 1rem;
     }
 
     .avatar-row {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         max-width: 100%;
     }
 
