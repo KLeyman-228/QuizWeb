@@ -131,7 +131,9 @@ textarea {
 }
 
 .page-container-landing {
-    transform: translateX(calc(var(--sidebar-width) / -2));
+    width: 100vw;
+    max-width: none;
+    margin-left: calc(var(--sidebar-width) * -1);
 }
 
 .card {
@@ -703,7 +705,9 @@ textarea {
     }
 
     .page-container-landing {
-        transform: none;
+        width: min(100%, 900px);
+        max-width: 900px;
+        margin-left: auto;
     }
 
     .community {
