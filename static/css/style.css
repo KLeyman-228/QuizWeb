@@ -10,7 +10,7 @@
     --bg-card-soft: rgba(46, 213, 115, 0.06);
     --bg-input: rgba(0, 0, 0, 0.8);
     --bg-input-hover: rgba(46, 213, 115, 0.1);
-    --bg-avatar: rgba(46, 213, 115, 0.08);
+    --bg-avatar: rgba(23, 105, 57, 0.08);
 
     --grid-color: rgba(92, 92, 92, 0.14);
     --border-color: rgba(46, 213, 115, 0.28);
@@ -27,7 +27,7 @@
 
     --success: #2ed573;
     --warning: #ffa502;
-    --error: #ff4757;
+    --error: #db4306;
     --accent: #ffd700;
 
     --radius: 0;
@@ -329,7 +329,7 @@ textarea {
 .login-wrap .btn-primary {
     min-width: 11.5rem;
     padding-inline: 1.55rem;
-    background: linear-gradient(135deg, #2ed573 0%, #7bed9f 100%);
+    background: linear-gradient(135deg, #21c30d 0%, #fffe00 100%);
     color: #04110a;
     box-shadow:
         0 0 0 1px rgba(255, 255, 255, 0.06),
@@ -337,7 +337,7 @@ textarea {
 }
 
 .login-wrap .btn-primary:hover {
-    background: linear-gradient(135deg, #47e68a 0%, #a7f8bc 100%);
+    background: linear-gradient(135deg, #c3b10d 0%, #2fff3a 100%);
 }
 
 .btn-success {
@@ -350,14 +350,14 @@ textarea {
 }
 
 .btn-accent {
-    --button-color: var(--accent);
-    background: var(--accent);
+    --button-color: var(--error);
+    background: var(--error);
     color: #111;
     box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.95);
 }
 
 .btn-accent:hover {
-    background: #ffe34a;
+    background: #6e0404;
     color: #000;
 }
 
@@ -388,8 +388,8 @@ textarea {
     width: 100%;
     aspect-ratio: 1;
     padding: 0.2rem;
-    border: 1px solid rgba(46, 213, 115, 0.32);
-    border-radius: 0.9rem;
+    border: 1px solid rgba(28, 131, 71, 0.32);
+    border-radius: 0.2rem;
     background: var(--bg-avatar);
     color: inherit;
     cursor: pointer;
