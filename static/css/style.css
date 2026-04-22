@@ -238,7 +238,7 @@ textarea {
     justify-content: center;
     min-height: 36px;
     padding: 0.48rem 0.9rem;
-    border: 2px solid #ffd700;
+    border: none;
     background: #050606;
     color: #ffd700;
     font-family: "Courier New", monospace;
@@ -247,12 +247,11 @@ textarea {
     letter-spacing: 0.12em;
     text-decoration: none;
     text-transform: uppercase;
-    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.95);
+    box-shadow: 4px 4px 0 #ffd700;
     cursor: pointer;
     transition:
         background-color 0.26s ease,
         color 0.26s ease,
-        border-color 0.26s ease,
         box-shadow 0.26s ease,
         transform 0.26s ease;
 }
@@ -267,7 +266,7 @@ textarea {
     background: #ffd700;
     color: #050606;
     transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.95);
+    box-shadow: 6px 6px 0 #ffd700;
     outline: none;
 }
 
