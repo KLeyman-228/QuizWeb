@@ -116,6 +116,7 @@ textarea {
     min-width: 0;
     min-height: 100vh;
     display: flex;
+    justify-content: center;
 }
 
 .page-container {
@@ -128,12 +129,14 @@ textarea {
     align-items: center;
     justify-content: center;
     gap: 1rem;
+    transform: translateX(calc(var(--sidebar-width) / -2));
 }
 
 .page-container-landing {
     width: 100vw;
     max-width: none;
     margin-left: calc(var(--sidebar-width) * -1);
+    transform: none;
 }
 
 .card {
@@ -702,6 +705,10 @@ textarea {
 @media (max-width: 900px) {
     .container {
         grid-template-columns: 1fr;
+    }
+
+    .page-container {
+        transform: none;
     }
 
     .page-container-landing {
