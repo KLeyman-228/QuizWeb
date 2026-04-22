@@ -370,26 +370,22 @@ textarea {
 .login-wrap .btn-primary {
     min-width: 11.5rem;
     padding-inline: 1.55rem;
-    background:
-        linear-gradient(#050606 0 0) center / 0% 100% no-repeat,
-        linear-gradient(135deg, #21c30d 0%, #fffe00 100%) center / 100% 100% no-repeat;
+    background: linear-gradient(135deg, #21c30d 0%, #fffe00 100%);
     color: #04110a;
     box-shadow:
         0 0 0 1px rgba(255, 255, 255, 0.06),
         6px 6px 0 rgba(0, 0, 0, 0.88);
     transition:
-        background-size 0.18s ease,
         color 0.18s ease,
         transform 0.18s ease,
         box-shadow 0.18s ease;
 }
 
 .login-wrap .btn-primary:hover {
-    color: #ffd700;
-    background-size: 100% 100%, 100% 100%;
+    color: #04110a;
     box-shadow:
         0 0 0 1px rgba(255, 255, 255, 0.06),
-        8px 8px 0 #ffd700;
+        3px 3px 0 #ffd700;
 }
 
 .btn-success {
