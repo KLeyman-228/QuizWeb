@@ -155,21 +155,6 @@ textarea {
     border: 1px solid rgba(46, 213, 115, 0.14);
     border-radius: 0;
     box-shadow: none;
-    --invite-bg: #050606;
-    --invite-hover-bg: #09130d;
-    --invite-ink: var(--green-main);
-    --invite-border: var(--green-main);
-    --invite-grid: rgba(46, 213, 115, 0.18);
-    --invite-glow: rgba(46, 213, 115, 0.22);
-}
-
-.discord-card:nth-of-type(even) {
-    --invite-bg: #ffd700;
-    --invite-hover-bg: #ffe34a;
-    --invite-ink: #050606;
-    --invite-border: #050606;
-    --invite-grid: rgba(0, 0, 0, 0.16);
-    --invite-glow: rgba(255, 215, 0, 0.16);
 }
 
 .discord-banner {
@@ -241,73 +226,44 @@ textarea {
 
 .discord-card-footer {
     margin-top: 0.8rem;
+    display: flex;
+    justify-content: center;
 }
 
 .discord-join-link {
-    position: relative;
     display: inline-flex;
-    width: 100%;
     align-items: center;
     justify-content: center;
-    min-height: 44px;
-    padding: 0.82rem 1rem;
-    overflow: hidden;
-    border: 3px solid var(--invite-border);
-    background-color: var(--invite-bg);
-    background-image:
-        linear-gradient(var(--invite-grid) 1px, transparent 1px),
-        linear-gradient(90deg, var(--invite-grid) 1px, transparent 1px),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.1) 100%);
-    background-size: 10px 10px, 10px 10px, auto;
-    color: var(--invite-ink);
+    min-height: 36px;
+    padding: 0.52rem 0.95rem;
+    border: 2px solid #ffd700;
+    background: #050606;
+    color: #ffd700;
     font-family: "Courier New", monospace;
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-decoration: none;
-    text-transform: uppercase;
-    box-shadow:
-        inset 0 0 0 1px rgba(255, 255, 255, 0.04),
-        6px 6px 0 rgba(0, 0, 0, 0.95);
-    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease;
-}
-
-.discord-join-link::before {
-    content: "";
-    position: absolute;
-    inset: 4px;
-    background:
-        linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.05) 50%, transparent 100%);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    pointer-events: none;
-}
-
-.discord-join-link::after {
-    content: ">>";
-    position: absolute;
-    top: 50%;
-    left: 0.75rem;
-    transform: translateY(-50%);
-    color: var(--invite-ink);
     font-size: 0.72rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
-    pointer-events: none;
+    letter-spacing: 0.14em;
+    text-decoration: none;
+    text-transform: uppercase;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.95);
+    transition:
+        background-color 0.22s ease,
+        color 0.22s ease,
+        border-color 0.22s ease,
+        box-shadow 0.22s ease,
+        transform 0.22s ease;
 }
 
 .discord-join-link span {
-    position: relative;
-    z-index: 1;
-    padding-left: 1rem;
-    text-shadow: 0 0 10px var(--invite-glow);
+    display: block;
+    line-height: 1;
 }
 
 .discord-join-link:hover {
-    background-color: var(--invite-hover-bg);
-    transform: translate(-2px, -2px);
-    box-shadow:
-        inset 0 0 0 1px rgba(255, 255, 255, 0.05),
-        8px 8px 0 rgba(0, 0, 0, 0.95);
+    background: #ffd700;
+    color: #050606;
+    transform: translate(-1px, -1px);
+    box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.95);
 }
 
 .discord-card-stats {
