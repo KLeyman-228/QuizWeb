@@ -247,7 +247,7 @@ textarea {
     letter-spacing: 0.12em;
     text-decoration: none;
     text-transform: uppercase;
-    box-shadow: 4px 4px 0 #ffd700;
+    box-shadow: 1px 1px 0 #ffd700;
     cursor: pointer;
     transition:
         background-color 0.26s ease,
@@ -266,7 +266,7 @@ textarea {
     background: #ffd700;
     color: #050606;
     transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0 #ffd700;
+    box-shadow: none;
     outline: none;
 }
 
