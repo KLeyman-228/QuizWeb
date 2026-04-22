@@ -155,13 +155,6 @@ textarea {
     border: 1px solid rgba(46, 213, 115, 0.14);
     border-radius: 0;
     box-shadow: none;
-    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
-}
-
-.discord-card:hover {
-    transform: translateY(-2px);
-    background: rgba(46, 213, 115, 0.07);
-    border-color: var(--border-strong);
 }
 
 .discord-banner {
@@ -232,32 +225,70 @@ textarea {
 }
 
 .discord-card-footer {
-    margin-top: 0.75rem;
+    margin-top: 0.85rem;
 }
 
 .discord-join-link {
+    position: relative;
     display: inline-flex;
     width: 100%;
     align-items: center;
     justify-content: center;
-    min-height: 38px;
-    padding: 0.7rem 0.9rem;
-    border: 1px solid rgba(46, 213, 115, 0.3);
-    background: rgba(46, 213, 115, 0.09);
-    color: var(--green-main);
-    font-size: 0.74rem;
+    min-height: 40px;
+    padding: 0.78rem 1rem;
+    overflow: hidden;
+    border: 1px solid rgba(46, 213, 115, 0.38);
+    background:
+        linear-gradient(135deg, rgba(46, 213, 115, 0.18) 0%, rgba(255, 215, 0, 0.2) 52%, rgba(46, 213, 115, 0.12) 100%);
+    color: #eafff0;
+    font-size: 0.76rem;
     font-weight: 700;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.16em;
     text-decoration: none;
     text-transform: uppercase;
-    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+        4px 4px 0 rgba(0, 0, 0, 0.95);
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, color 0.15s ease, filter 0.15s ease;
+}
+
+.discord-join-link::before {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    background:
+        linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.08) 50%, transparent 100%),
+        linear-gradient(180deg, rgba(3, 7, 7, 0.2) 0%, rgba(3, 7, 7, 0.02) 100%);
+    clip-path: inherit;
+    pointer-events: none;
+}
+
+.discord-join-link::after {
+    content: "LINK";
+    position: absolute;
+    top: 50%;
+    right: 0.8rem;
+    transform: translateY(-50%);
+    color: rgba(4, 17, 10, 0.75);
+    font-size: 0.52rem;
+    letter-spacing: 0.18em;
+    pointer-events: none;
+}
+
+.discord-join-link span {
+    position: relative;
+    z-index: 1;
 }
 
 .discord-join-link:hover {
-    background: rgba(46, 213, 115, 0.16);
     border-color: var(--border-strong);
-    color: #d8ffe4;
-    transform: translateY(-1px);
+    color: #ffffff;
+    filter: saturate(1.08) brightness(1.04);
+    transform: translate(-2px, -2px);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+        6px 6px 0 rgba(0, 0, 0, 0.95);
 }
 
 .discord-card-stats {
