@@ -91,6 +91,8 @@ textarea {
     flex-direction: column;
     gap: 1rem;
     padding: 0.85rem 0.7rem;
+    position: relative;
+    z-index: 1;
     border-right: 1px solid rgba(46, 213, 115, 0.16);
     background: rgba(13, 16, 16, 0.82);
 }
