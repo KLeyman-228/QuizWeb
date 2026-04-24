@@ -7,11 +7,80 @@ let reconnectDelay = 1000;
 let gameFinished = false;
 let answered = false;
 let myAnswer = null;
+let currentQuestionId = null;
+let questionTimer = null;
+let revealTimer = null;
+let timerExpiredSentFor = null;
+let revealExpiredSentFor = null;
 
 function wsSend(data) {
     if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify(data));
     }
+}
+
+function clearQuestionTimer() {
+    if (questionTimer) {
+        clearInterval(questionTimer);
+        questionTimer = null;
+    }
+}
+
+function clearRevealTimer() {
+    if (revealTimer) {
+        clearInterval(revealTimer);
+        revealTimer = null;
+    }
+}
+
+function setTimerLabel(text) {
+    const timer = document.getElementById("timer");
+    if (timer) timer.textContent = text;
+}
+
+function startQuestionTimer(questionId, startedAt, durationSeconds) {
+    clearQuestionTimer();
+    timerExpiredSentFor = null;
+
+    const deadline = Date.parse(startedAt) + durationSeconds * 1000;
+    const tick = () => {
+        const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+        setTimerLabel(`Осталось: ${remaining}с`);
+
+        if (remaining === 0) {
+            clearQuestionTimer();
+            setTimerLabel("Проверяем ответы...");
+            if (timerExpiredSentFor !== questionId) {
+                timerExpiredSentFor = questionId;
+                wsSend({ type: "timer_expired", question_id: questionId });
+            }
+        }
+    };
+
+    tick();
+    questionTimer = setInterval(tick, 250);
+}
+
+function startRevealTimer(questionId, revealedAt, revealSeconds) {
+    clearRevealTimer();
+    revealExpiredSentFor = null;
+
+    const deadline = Date.parse(revealedAt) + revealSeconds * 1000;
+    const tick = () => {
+        const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+        setTimerLabel(`Следующий вопрос через: ${remaining}с`);
+
+        if (remaining === 0) {
+            clearRevealTimer();
+            if (revealExpiredSentFor !== questionId) {
+                revealExpiredSentFor = questionId;
+                wsSend({ type: "reveal_expired", question_id: questionId });
+            }
+        }
+    };
+
+    tick();
+    revealTimer = setInterval(tick, 250);
 }
 
 function connect() {
@@ -27,19 +96,41 @@ function connect() {
         const msg = JSON.parse(event.data);
 
         if (msg.type === "lobby_update") renderPlayers(msg.players);
-        if (msg.type === "question_show") renderQuestion(msg.question, msg.index);
-        if (msg.type === "timer_tick") {
-            const timer = document.getElementById("timer");
-            if (timer) timer.textContent = `Осталось: ${msg.remaining}с`;
+        if (msg.type === "question_show") {
+            renderQuestion(msg.question, msg.index);
+            currentQuestionId = msg.question_id;
+            clearRevealTimer();
+
+            if (!msg.revealed_at) {
+                startQuestionTimer(msg.question_id, msg.started_at, msg.duration_seconds);
+            } else {
+                clearQuestionTimer();
+                setTimerLabel("Ответ раскрыт");
+            }
+        }
+        if (msg.type === "error") {
+            alert(msg.message);
+        }
+        if (msg.type === "join_denied") {
+            alert(msg.message);
+            window.location.href = "/";
         }
         if (msg.type === "game_finished") {
             gameFinished = true;
+            clearQuestionTimer();
+            clearRevealTimer();
             renderLeaderboard(msg.leaderboard);
         }
         if (msg.type === "your_token") {
             sessionStorage.setItem(`token_${window.LOBBY_CODE}`, msg.token);
         }
-        if (msg.type === "reveal_answer") revealAnswer(msg.correct_index);
+        if (msg.type === "reveal_answer") {
+            revealAnswer(msg.correct_index);
+            if (currentQuestionId === msg.question_id) {
+                clearQuestionTimer();
+                startRevealTimer(msg.question_id, msg.revealed_at, msg.reveal_seconds);
+            }
+        }
         if (msg.type === "already_answered") {
             answered = true;
             document.querySelectorAll("#options button").forEach((button) => {

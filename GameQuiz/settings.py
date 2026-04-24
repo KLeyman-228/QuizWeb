@@ -1,6 +1,9 @@
 
 from pathlib import Path
 import os
+import sys
+
+import dj_database_url
 from dotenv import load_dotenv
 
 
@@ -9,11 +12,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 
-#'django-insecure-a(sx%jfdkazw#d+c2f0s_^_!t%nx%!^i0w9h@aqlua4ou6bb(='
+def env_bool(name, default=False):
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.lower() in {"1", "true", "yes", "on"}
 
-SECRET_KEY = os.environ["SECRET_KEY"]
-DEBUG = os.environ.get("DEBUG", "False") == "True"
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
+
+SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-local-dev-key")
+DEBUG = env_bool("DEBUG", default=True)
+
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    if host.strip()
+]
+
+IS_TEST = "test" in sys.argv
+HAS_POSTGRES_CONFIG = all(
+    os.environ.get(name)
+    for name in ("DB_NAME", "DB_USER", "DB_PASSWORD", "DB_HOST", "DB_PORT")
+)
 
 # For HTTPS deployments (Railway, etc.)
 CSRF_TRUSTED_ORIGINS = []
@@ -74,25 +93,52 @@ ASGI_APPLICATION = 'GameQuiz.asgi.application'
 
 # Database
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ["DB_NAME"],
-        "USER": os.environ["DB_USER"],
-        "PASSWORD": os.environ["DB_PASSWORD"],
-        "HOST": os.environ["DB_HOST"],
-        "PORT": os.environ["DB_PORT"],
-    }
-}
+database_url = os.environ.get("DATABASE_URL")
+use_sqlite = IS_TEST or env_bool("USE_SQLITE", default=not (database_url or HAS_POSTGRES_CONFIG))
 
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [os.environ.get("REDIS_URL", "redis://127.0.0.1:6379")],
+if database_url:
+    DATABASES = {
+        "default": dj_database_url.parse(database_url, conn_max_age=600, ssl_require=False),
+    }
+elif use_sqlite:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ["DB_NAME"],
+            "USER": os.environ["DB_USER"],
+            "PASSWORD": os.environ["DB_PASSWORD"],
+            "HOST": os.environ["DB_HOST"],
+            "PORT": os.environ["DB_PORT"],
+        }
+    }
+
+use_in_memory_channel_layer = IS_TEST or env_bool(
+    "USE_IN_MEMORY_CHANNEL_LAYER",
+    default=not os.environ.get("REDIS_URL"),
+)
+
+if use_in_memory_channel_layer:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
+        }
+    }
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [os.environ["REDIS_URL"]],
+            },
         },
-    },
-}
+    }
 
 # Password validation
 

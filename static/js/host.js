@@ -3,11 +3,80 @@ const proto = location.protocol === "https:" ? "wss://" : "ws://";
 let ws = null;
 let reconnectDelay = 1000;
 let gameFinished = false;
+let currentQuestionId = null;
+let questionTimer = null;
+let revealTimer = null;
+let timerExpiredSentFor = null;
+let revealExpiredSentFor = null;
 
 function wsSend(data) {
     if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify(data));
     }
+}
+
+function clearQuestionTimer() {
+    if (questionTimer) {
+        clearInterval(questionTimer);
+        questionTimer = null;
+    }
+}
+
+function clearRevealTimer() {
+    if (revealTimer) {
+        clearInterval(revealTimer);
+        revealTimer = null;
+    }
+}
+
+function setTimerLabel(text) {
+    const timer = document.getElementById("timer");
+    if (timer) timer.textContent = text;
+}
+
+function startQuestionTimer(questionId, startedAt, durationSeconds) {
+    clearQuestionTimer();
+    timerExpiredSentFor = null;
+
+    const deadline = Date.parse(startedAt) + durationSeconds * 1000;
+    const tick = () => {
+        const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+        setTimerLabel(`${remaining}с`);
+
+        if (remaining === 0) {
+            clearQuestionTimer();
+            setTimerLabel("Проверяем ответы...");
+            if (timerExpiredSentFor !== questionId) {
+                timerExpiredSentFor = questionId;
+                wsSend({ type: "timer_expired", question_id: questionId });
+            }
+        }
+    };
+
+    tick();
+    questionTimer = setInterval(tick, 250);
+}
+
+function startRevealTimer(questionId, revealedAt, revealSeconds) {
+    clearRevealTimer();
+    revealExpiredSentFor = null;
+
+    const deadline = Date.parse(revealedAt) + revealSeconds * 1000;
+    const tick = () => {
+        const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+        setTimerLabel(`Следующий через ${remaining}с`);
+
+        if (remaining === 0) {
+            clearRevealTimer();
+            if (revealExpiredSentFor !== questionId) {
+                revealExpiredSentFor = questionId;
+                wsSend({ type: "reveal_expired", question_id: questionId });
+            }
+        }
+    };
+
+    tick();
+    revealTimer = setInterval(tick, 250);
 }
 
 function connect() {
@@ -22,23 +91,42 @@ function connect() {
         const msg = JSON.parse(event.data);
 
         if (msg.type === "lobby_update") renderPlayers(msg.players);
+        if (msg.type === "error") {
+            alert(msg.message);
+            document.getElementById("next-btn").classList.add("hidden");
+            document.getElementById("start-btn").classList.remove("hidden");
+        }
         if (msg.type === "question_show") {
             renderHostQuestion(msg.question, msg.index);
+            currentQuestionId = msg.question_id;
+            clearRevealTimer();
             document.getElementById("start-btn").classList.add("hidden");
             document.getElementById("next-btn").classList.remove("hidden");
+
+            if (!msg.revealed_at) {
+                startQuestionTimer(msg.question_id, msg.started_at, msg.duration_seconds);
+            } else {
+                clearQuestionTimer();
+                setTimerLabel("Ответ раскрыт");
+            }
         }
         if (msg.type === "answer_stats") updateStats(msg.stats);
-        if (msg.type === "timer_tick") {
-            const timer = document.getElementById("timer");
-            if (timer) timer.textContent = `${msg.remaining}с`;
-        }
         if (msg.type === "game_finished") {
             gameFinished = true;
+            clearQuestionTimer();
+            clearRevealTimer();
+            document.getElementById("next-btn").classList.add("hidden");
+            document.getElementById("start-btn").classList.remove("hidden");
             renderLeaderboard(msg.leaderboard);
         }
         if (msg.type === "reveal_answer") {
             const row = document.getElementById(`opt-${msg.correct_index}`);
             if (row) row.classList.add("correct");
+
+            if (currentQuestionId === msg.question_id) {
+                clearQuestionTimer();
+                startRevealTimer(msg.question_id, msg.revealed_at, msg.reveal_seconds);
+            }
         }
         if (msg.type === "chat_message") appendChatMessage(msg.player, msg.text);
     };
@@ -54,8 +142,6 @@ connect();
 
 document.getElementById("start-btn").onclick = () => {
     wsSend({ type: "start_game" });
-    document.getElementById("start-btn").classList.add("hidden");
-    document.getElementById("next-btn").classList.remove("hidden");
 };
 
 document.getElementById("next-btn").onclick = () => {
@@ -142,6 +228,7 @@ function renderHostQuestion(question, index) {
         const row = document.createElement("div");
         row.className = "answer-option-host";
         row.id = `opt-${optionIndex}`;
+        row.dataset.optionIndex = optionIndex;
         row.innerHTML = `
             <span class="font-bold">${optionIndex + 1}. ${option}</span>
             <span class="text-2xl font-bold score-text" data-count>0</span>
@@ -151,13 +238,11 @@ function renderHostQuestion(question, index) {
 }
 
 function updateStats(stats) {
-    for (let index = 0; index < 4; index += 1) {
-        const row = document.getElementById(`opt-${index}`);
-        if (!row) continue;
-
+    document.querySelectorAll("[data-option-index]").forEach((row) => {
+        const index = row.dataset.optionIndex;
         const badge = row.querySelector("[data-count]");
         if (badge) badge.textContent = stats[index] || 0;
-    }
+    });
 }
 
 function renderLeaderboard(list) {

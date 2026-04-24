@@ -1,2 +1,6 @@
 templates/test.html
 static/css/style2.css
+db.sqlite3
+staticfiles/
+__pycache__/
+*.pyc
