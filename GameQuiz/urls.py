@@ -18,10 +18,12 @@ from django.contrib import admin
 from django.urls import path
 from quiz import views
 
+handler404 = 'quiz.views.page_not_found'
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", views.index_view, name="index"),
     path("lobby/<str:code>/", views.lobby_view, name="lobby"),
     path("host/<str:code>/", views.host_view, name="host"),
-    path("api/new-lobby/", views.new_lobby_api, name="new_lobby"),
+    path("api/new-lobby/", views.new_lobby_api, name="new-lobby"),
 ]
