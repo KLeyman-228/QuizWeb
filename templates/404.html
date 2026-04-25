@@ -61,8 +61,6 @@
             mix-blend-mode: multiply;
             background-size: 400%;
             background-position: 10%;
-            opacity: 0.2;
-            animation: move-light 5s infinite;
         }
 
 
@@ -79,17 +77,6 @@
             }
         }
 
-        @keyframes move-light {
-            0% {
-                background-position: 10%;
-            }
-            50% {
-                background-position: 90%;
-            }
-            100% {
-                background-position: 90%;
-            }
-        }
 
         .error-content {
             position: relative;
@@ -118,7 +105,7 @@
         .error-title {
             font-size: 2rem;
             font-weight: 700;
-            color: #2ed573;
+            color: #e6f1ec;
             margin-bottom: 1rem;
             text-transform: uppercase;
             letter-spacing: 0.2em;
@@ -126,34 +113,13 @@
 
         .error-message {
             font-size: 1.2rem;
-            color: #7bed9f;
+            color: #8aa595;
             margin-bottom: 2rem;
             max-width: 400px;
             margin-left: auto;
             margin-right: auto;
         }
 
-        .back-btn {
-            display: inline-block;
-            padding: 1rem 2.5rem;
-            font-size: 1rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: #2ed573;
-            background: transparent;
-            border: 2px solid #2ed573;
-            border-radius: 0.5rem;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .back-btn:hover {
-            background: #2ed573;
-            color: #111;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(46, 213, 115, 0.4);
-        }
 
         @media (max-width: 600px) {
             .error-code {
