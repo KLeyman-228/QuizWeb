@@ -34,11 +34,23 @@ function setTimerLabel(text) {
     if (timer) timer.textContent = text;
 }
 
+function parseServerDate(value) {
+    if (!value) return NaN;
+
+    const timestamp = Date.parse(value);
+    if (!Number.isNaN(timestamp)) return timestamp;
+
+    const fallback = Date.parse(`${value}Z`);
+    return Number.isNaN(fallback) ? NaN : fallback;
+}
+
 function startQuestionTimer(questionId, startedAt, durationSeconds) {
     clearQuestionTimer();
     timerExpiredSentFor = null;
 
-    const deadline = Date.parse(startedAt) + durationSeconds * 1000;
+    const startedTimestamp = parseServerDate(startedAt);
+    const safeStart = Number.isNaN(startedTimestamp) ? Date.now() : startedTimestamp;
+    const deadline = safeStart + durationSeconds * 1000;
     const tick = () => {
         const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
         setTimerLabel(`${remaining}с`);
@@ -61,7 +73,9 @@ function startRevealTimer(questionId, revealedAt, revealSeconds) {
     clearRevealTimer();
     revealExpiredSentFor = null;
 
-    const deadline = Date.parse(revealedAt) + revealSeconds * 1000;
+    const revealedTimestamp = parseServerDate(revealedAt);
+    const safeReveal = Number.isNaN(revealedTimestamp) ? Date.now() : revealedTimestamp;
+    const deadline = safeReveal + revealSeconds * 1000;
     const tick = () => {
         const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
         setTimerLabel(`Следующий через ${remaining}с`);
