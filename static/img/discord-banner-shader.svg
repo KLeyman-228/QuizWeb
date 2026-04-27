@@ -2,11 +2,15 @@
 <g clip-path="url(#clip0_30_2)">
 <rect width="560" height="160" fill="#1C1C1C"/>
 <path d="M560 0H0V160H560V0Z" fill="#1C1C1C"/>
-<rect x="118" y="19" width="324" height="121" fill="url(#pattern0_30_2)"/>
+<path d="M230.863 9H485V151H117L230.863 148.066V9Z" fill="url(#pattern0_30_2)"/>
+<path d="M74 9H453H192.913V96.4298V136.331L74 151V9Z" fill="url(#pattern1_30_2)"/>
 </g>
 <defs>
 <pattern id="pattern0_30_2" patternContentUnits="objectBoundingBox" width="1" height="1">
-<use xlink:href="#image0_30_2" transform="matrix(0.000623053 0 0 0.00166834 0 -0.000502047)"/>
+<use xlink:href="#image0_30_2" transform="matrix(0.000643116 0 0 0.00166667 -0.0161005 0)"/>
+</pattern>
+<pattern id="pattern1_30_2" patternContentUnits="objectBoundingBox" width="1" height="1">
+<use xlink:href="#image0_30_2" transform="matrix(0.00062445 0 0 0.00166667 -0.00112137 0)"/>
 </pattern>
 <clipPath id="clip0_30_2">
 <rect width="560" height="160" fill="white"/>

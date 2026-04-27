@@ -34,7 +34,7 @@ function clearRevealTimer() {
 }
 
 function setTimerLabel(text) {
-    const timer = document.getElementById("timer");
+    const timer = document.getElementById("question-timer") || document.getElementById("timer");
     if (timer) timer.textContent = text;
 }
 
@@ -207,7 +207,7 @@ function renderQuestion(question, index) {
         <div class="text-slate-400 mb-2">Вопрос ${index + 1}</div>
         <div class="text-xl font-bold mb-4">${question.text}</div>
         <div id="options" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-        <div id="timer" class="text-right text-slate-400 mt-3"></div>
+        <div id="question-timer" class="text-right text-slate-400 mt-3">Осталось: --с</div>
     `;
 
     question.options.forEach((option, optionIndex) => {

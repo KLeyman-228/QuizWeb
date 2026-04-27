@@ -670,7 +670,8 @@ textarea {
     text-transform: uppercase;
 }
 
-#timer {
+#timer,
+#question-timer {
     color: var(--warning);
     font-size: 1rem;
     font-weight: 700;
