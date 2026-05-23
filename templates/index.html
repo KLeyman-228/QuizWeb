@@ -16,18 +16,9 @@
 
         <p class="text-sm text-muted text-center" style="margin-top: 1.5rem; margin-bottom: 1rem; letter-spacing: 0.1em; text-transform: uppercase;">Выбор аватарки</p>
         <div class="avatar-row">
-            <button type="button" class="avatar-btn selected" data-avatar="🦊">🦊</button>
-            <button type="button" class="avatar-btn" data-avatar="🐼">🐼</button>
-            <button type="button" class="avatar-btn" data-avatar="🐸">🐸</button>
-            <button type="button" class="avatar-btn" data-avatar="🦃">🦃</button>
-            <button type="button" class="avatar-btn" data-avatar="👾">👾</button>
-            <button type="button" class="avatar-btn" data-avatar="🐧">🐧</button>
-            <button type="button" class="avatar-btn" data-avatar="🐺">🐺</button>
-            <button type="button" class="avatar-btn" data-avatar="🦉">🦉</button>
-            <button type="button" class="avatar-btn" data-avatar="👽">👽</button>
-            <button type="button" class="avatar-btn" data-avatar="🦄">🦄</button>
-            <button type="button" class="avatar-btn" data-avatar="🐲">🐲</button>
-            <button type="button" class="avatar-btn" data-avatar="🦀">🦀</button>
+            {% for avatar in avatars %}
+            <button type="button" class="avatar-btn{% if forloop.first %} selected{% endif %}" data-avatar="{{ avatar }}">{{ avatar }}</button>
+            {% endfor %}
         </div>
 
         <div class="text-center" style="margin-top: 1.5rem;">
@@ -46,7 +37,8 @@
 
 {% block extra_js %}
 <script>
-let selectedAvatar = "🦊";
+let selectedAvatar = "{{ avatars.0|escapejs }}";
+const csrfToken = "{{ csrf_token }}";
 
 document.querySelectorAll(".avatar-btn").forEach((button) => {
     button.onclick = () => {
@@ -73,7 +65,14 @@ document.getElementById("join-btn").onclick = () => {
 const hostButton = document.getElementById("host-btn");
 if (hostButton) {
     hostButton.onclick = async () => {
-        const response = await fetch("/api/new-lobby/", { method: "POST" });
+        const response = await fetch("/api/new-lobby/", {
+            method: "POST",
+            headers: { "X-CSRFToken": csrfToken },
+        });
+        if (!response.ok) {
+            alert("Не удалось создать комнату");
+            return;
+        }
         const data = await response.json();
         window.location.href = `/host/${data.code}/`;
     };

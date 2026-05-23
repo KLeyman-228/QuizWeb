@@ -9,7 +9,7 @@ from channels.auth import AuthMiddlewareStack
 from quiz.routing import websocket_urlpatterns
 
 application = ProtocolTypeRouter({
-    "http": get_asgi_application(),
+    "http": django_asgi_app,
     "websocket": AuthMiddlewareStack(
         URLRouter(websocket_urlpatterns)
     )

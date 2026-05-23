@@ -80,6 +80,7 @@ class QuizConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.lobby_code = self.scope["url_route"]["kwargs"]["lobby_code"]
         self.group_name = f"lobby_{self.lobby_code}"
+        self.added_to_group = False
         self.lobby = await db_get_lobby(self.lobby_code)
 
         if not self.lobby:
@@ -87,10 +88,11 @@ class QuizConsumer(AsyncWebsocketConsumer):
             return
 
         await self.channel_layer.group_add(self.group_name, self.channel_name)
+        self.added_to_group = True
         await self.accept()
 
     async def disconnect(self, _code):
-        if not hasattr(self, "group_name"):
+        if not hasattr(self, "group_name") or not getattr(self, "lobby", None):
             return
 
         lobby_status = await db_get_lobby_status(self.lobby.id)
@@ -98,7 +100,8 @@ class QuizConsumer(AsyncWebsocketConsumer):
             await db_delete_player_by_channel(self.channel_name)
             await self.broadcast_lobby()
 
-        await self.channel_layer.group_discard(self.group_name, self.channel_name)
+        if getattr(self, "added_to_group", False):
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
     async def receive(self, text_data=None, bytes_data=None):
         if not text_data:
@@ -132,7 +135,7 @@ class QuizConsumer(AsyncWebsocketConsumer):
             return
 
         if data_type in {"start_game", "next_question", "finish_game"}:
-            if not getattr(self, "is_host", False):
+            if not await self.is_current_host():
                 return
             if data_type == "start_game":
                 await self.handle_start_game()
@@ -144,10 +147,25 @@ class QuizConsumer(AsyncWebsocketConsumer):
 
         await self.send_json({"type": "error", "message": "Неизвестный тип сообщения"})
 
+    def scope_user_is_superuser(self):
+        user = self.scope.get("user")
+        return bool(
+            getattr(user, "is_authenticated", False)
+            and getattr(user, "is_superuser", False)
+        )
+
+    async def is_current_host(self):
+        if not getattr(self, "is_host", False) or not getattr(self, "player_id", None):
+            return False
+        if not self.scope_user_is_superuser():
+            return False
+        return await db_is_current_host(self.lobby.id, self.player_id, self.channel_name)
+
     async def handle_join_player(self, data):
         token = data.get("token") or None
         existing_player = await db_get_player_by_token(token) if token else None
         is_reconnect = False
+        should_restore_state = False
 
         if existing_player and existing_player["lobby_id"] == self.lobby.id:
             self.player_id = existing_player["id"]
@@ -156,15 +174,17 @@ class QuizConsumer(AsyncWebsocketConsumer):
             self.is_host = existing_player["is_host"]
             await db_update_player_channel(self.player_id, self.channel_name)
             is_reconnect = True
+            should_restore_state = True
         else:
             lobby_status = await db_get_lobby_status(self.lobby.id)
-            if lobby_status != "wait":
+            if lobby_status == "finish":
                 await self.send_json({
                     "type": "join_denied",
-                    "message": "Игра уже началась. Можно только переподключиться по сохранённой сессии.",
+                    "message": "Игра уже завершена.",
                 })
                 await self.close(code=4403)
                 return
+            should_restore_state = lobby_status == "play"
 
             self.player_name = normalize_player_name(data.get("name"))
             self.avatar = normalize_avatar(data.get("avatar"))
@@ -181,10 +201,15 @@ class QuizConsumer(AsyncWebsocketConsumer):
         await self.send_json({"type": "your_token", "token": new_token})
         await self.broadcast_lobby()
 
-        if is_reconnect:
+        if should_restore_state or is_reconnect:
             await self.restore_session_state()
 
     async def handle_join_host(self):
+        if not self.scope_user_is_superuser():
+            await self.send_json({"type": "error", "message": "Доступ запрещён"})
+            await self.close(code=4403)
+            return
+
         if await db_has_host(self.lobby.id):
             await db_delete_host(self.lobby.id)
 
@@ -255,6 +280,10 @@ class QuizConsumer(AsyncWebsocketConsumer):
         )
 
     async def handle_start_game(self):
+        lobby_status = await db_get_lobby_status(self.lobby.id)
+        if lobby_status == "play":
+            return
+
         question_ids = await db_load_random_question_ids(QUESTIONS_PER_GAME)
         if not question_ids:
             await self.send_json({
@@ -442,6 +471,16 @@ def db_get_lobby_state(lobby_id):
 @database_sync_to_async
 def db_has_host(lobby_id):
     return Player.objects.filter(lobby_id=lobby_id, is_host=True).exists()
+
+
+@database_sync_to_async
+def db_is_current_host(lobby_id, player_id, channel_name):
+    return Player.objects.filter(
+        id=player_id,
+        lobby_id=lobby_id,
+        channel_name=channel_name,
+        is_host=True,
+    ).exists()
 
 
 @database_sync_to_async

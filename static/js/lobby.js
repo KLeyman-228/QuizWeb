@@ -179,10 +179,16 @@ function renderPlayers(players) {
     filtered.forEach((player) => {
         const item = document.createElement("div");
         item.className = "player-card";
-        item.innerHTML = `
-            <div class="player-card-avatar">${player.avatar}</div>
-            <div class="player-card-name">${player.name}</div>
-        `;
+
+        const avatar = document.createElement("div");
+        avatar.className = "player-card-avatar";
+        avatar.textContent = player.avatar;
+
+        const name = document.createElement("div");
+        name.className = "player-card-name";
+        name.textContent = player.name;
+
+        item.append(avatar, name);
         box.appendChild(item);
     });
 }
@@ -203,19 +209,33 @@ function renderQuestion(question, index) {
 
     const box = document.getElementById("question");
     box.classList.remove("hidden");
-    box.innerHTML = `
-        <div class="text-slate-400 mb-2">Вопрос ${index + 1}</div>
-        <div class="text-xl font-bold mb-4">${question.text}</div>
-        <div id="options" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-        <div id="question-timer" class="text-right text-slate-400 mt-3">Осталось: --с</div>
-    `;
+    box.textContent = "";
+
+    const label = document.createElement("div");
+    label.className = "text-slate-400 mb-2";
+    label.textContent = `Вопрос ${index + 1}`;
+
+    const title = document.createElement("div");
+    title.className = "text-xl font-bold mb-4";
+    title.textContent = question.text;
+
+    const options = document.createElement("div");
+    options.id = "options";
+    options.className = "grid grid-cols-1 md:grid-cols-2 gap-3";
+
+    const timer = document.createElement("div");
+    timer.id = "question-timer";
+    timer.className = "text-right text-slate-400 mt-3";
+    timer.textContent = "Осталось: --с";
+
+    box.append(label, title, options, timer);
 
     question.options.forEach((option, optionIndex) => {
         const button = document.createElement("button");
         button.className = "answer-option";
         button.textContent = `${optionIndex + 1}. ${option}`;
         button.onclick = () => sendAnswer(optionIndex, button);
-        document.getElementById("options").appendChild(button);
+        options.appendChild(button);
     });
 }
 
@@ -227,29 +247,41 @@ function renderLeaderboard(list) {
     const sorted = [...list].sort((a, b) => b.exp - a.exp);
 
     box.classList.remove("hidden");
-    box.innerHTML = `<h2 class="text-2xl font-bold mb-4">Итоги</h2>`;
+    box.textContent = "";
+
+    const title = document.createElement("h2");
+    title.className = "text-2xl font-bold mb-4";
+    title.textContent = "Итоги";
+    box.appendChild(title);
 
     sorted.forEach((player, index) => {
         const medal = ["🥇", "🥈", "🥉"][index] || `${index + 1}.`;
         const row = document.createElement("div");
         row.className = "leaderboard-row";
-        row.innerHTML = `
-            <div class="flex items-center gap-3">
-                <span class="text-2xl">${medal}</span>
-                <span class="text-2xl">${player.avatar}</span>
-                <span class="font-bold">${player.name}</span>
-            </div>
-            <span class="text-xl font-bold score-text">${player.exp} exp</span>
-        `;
+
+        const left = document.createElement("div");
+        left.className = "flex items-center gap-3";
+
+        const medalEl = document.createElement("span");
+        medalEl.className = "text-2xl";
+        medalEl.textContent = medal;
+
+        const avatar = document.createElement("span");
+        avatar.className = "text-2xl";
+        avatar.textContent = player.avatar;
+
+        const name = document.createElement("span");
+        name.className = "font-bold";
+        name.textContent = player.name;
+
+        const score = document.createElement("span");
+        score.className = "text-xl font-bold score-text";
+        score.textContent = `${player.exp} exp`;
+
+        left.append(medalEl, avatar, name);
+        row.append(left, score);
         box.appendChild(row);
     });
-}
-
-function escapeHtml(value) {
-    return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
 }
 
 function appendChatMessage(player, text) {
@@ -258,10 +290,19 @@ function appendChatMessage(player, text) {
 
     const message = document.createElement("div");
     message.className = "chat-msg";
-    message.innerHTML =
-        `<span>${escapeHtml(player.avatar)}</span>` +
-        `<span class="chat-msg-name">${escapeHtml(player.name)}:</span>` +
-        `<span class="chat-msg-text">${escapeHtml(text)}</span>`;
+
+    const avatar = document.createElement("span");
+    avatar.textContent = player.avatar;
+
+    const name = document.createElement("span");
+    name.className = "chat-msg-name";
+    name.textContent = `${player.name}:`;
+
+    const body = document.createElement("span");
+    body.className = "chat-msg-text";
+    body.textContent = text;
+
+    message.append(avatar, name, body);
 
     box.appendChild(message);
     box.scrollTop = box.scrollHeight;
