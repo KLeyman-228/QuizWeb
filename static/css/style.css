@@ -9,23 +9,23 @@
     --bg-card: rgba(0, 0, 0, 0.84);
     --bg-card-soft: rgba(46, 213, 115, 0.06);
     --bg-input: rgba(0, 0, 0, 0.8);
-    --bg-input-hover: rgba(46, 213, 115, 0.1);
+    --bg-input-hover: rgba(4, 19, 10, 0.1);
     --bg-avatar: rgba(23, 105, 57, 0.08);
 
-    --grid-color: rgba(92, 92, 92, 0.14);
-    --border-color: rgba(46, 213, 115, 0.28);
-    --border-strong: #2ed573;
+    --grid-color: rgba(56, 56, 56, 0.14);
+    --border-color: rgba(28, 184, 93, 0.28);
+    --border-strong: #01ff16;
 
-    --green-main: #2ed573;
-    --green-soft: #7bed9f;
-    --green-dark: #1e9e55;
+    --green-main: #1fc147;
+    --green-soft: #2d9320;
+    --green-dark: #103a08;
 
     --text-main: #e6f1ec;
     --text-muted: #8aa595;
     --text-dim: #577161;
-    --text-score: #7bed9f;
+    --text-score: #48a07f;
 
-    --success: #2ed573;
+    --success: #00ff1f;
     --warning: #ffa502;
     --error: #db4306;
     --accent: #ffd700;
@@ -513,20 +513,16 @@ textarea {
 
 .player-card,
 .player-card-sm {
-    border: 1px solid rgba(46, 213, 115, 0.3);
+    border: 1px solid rgb(165 255 86 / 10%);
     border-radius: 1rem;
-    background: var(--bg-card);
+    background: rgb(6 11 6);
     text-align: center;
+    box-shadow: 5px 8px 0 rgb(0 0 0)
 }
 
 .player-card {
     padding: 0.85rem 0.7rem;
     transition: transform 0.18s ease, border-color 0.18s ease;
-}
-
-.player-card:hover {
-    transform: translateY(-2px);
-    border-color: var(--border-strong);
 }
 
 .player-card-avatar {
