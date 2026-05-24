@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>404 - Страница не найдена</title>
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -13,137 +13,529 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --green-main: #22ff68;
+            --green-hard: #39ff14;
+            --green-deep: #047a32;
+            --black-main: #010201;
+            --black-panel: #050805;
+            --text-main: #eaffef;
+            --text-muted: #6da77f;
+        }
+
         body {
-            font-family: 'Rubik', sans-serif;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            min-height: 100svh;
             overflow: hidden;
+            background: var(--black-main);
+            font-family: 'Rubik', sans-serif;
         }
 
-        .container {
+        .error-page {
             position: relative;
-            width: 100%;
-            height: 100vh;
-            background-color: #111;
+            display: grid;
+            min-height: 100vh;
+            min-height: 100svh;
+            place-items: center;
             overflow: hidden;
+            padding: clamp(1.5rem, 5vw, 3rem);
+            isolation: isolate;
+            background: var(--black-main);
         }
 
-        .container::before {
+        .error-page::before {
             content: "";
             position: absolute;
             inset: 0;
-            background-image: url("/static/img/404-pattern.svg");
-            background-size: 50px 50px;
-            opacity: 0.1;
-            animation: move404 4s linear infinite;
+            z-index: 0;
+            background-image:
+                radial-gradient(black 55%, #0000),
+                linear-gradient(
+                    135deg,
+                    red,
+                    orange,
+                    yellow,
+                    lime,
+                    cyan,
+                    blue,
+                    indigo,
+                    deeppink
+                );
+            background-size: 100% 0.5%, contain;
+            pointer-events: none;
         }
 
-        .container::after {
+        .error-page::after {
             content: "";
             position: absolute;
             inset: 0;
-            background-image: linear-gradient(
-                -62.5deg,
-                lime,
-                green,
-                green,
-                green,
-                green,
-                lime,
-                green,
-                green,
-                green,
-                green,
-                lime
-            );
-            mix-blend-mode: multiply;
-            background-size: 400%;
-            background-position: 10%;
+            z-index: 1;
+            background: radial-gradient(circle at 50% 47%, transparent 0 18rem, rgba(0, 0, 0, 0.76) 32rem);
+            pointer-events: none;
         }
-
-
-        @keyframes move404 {
-            from {
-                background-position:
-                    0 0,
-                    0;
-            }
-            to {
-                background-position:
-                    calc(84px * 4) calc(54px * 2),
-                    0;
-            }
-        }
-
 
         .error-content {
             position: relative;
-            z-index: 10;
+            z-index: 2;
+            display: flex;
+            width: min(100%, 680px);
+            align-items: center;
+            flex-direction: column;
+            justify-content: center;
+            gap: clamp(0.75rem, 2vw, 1.1rem);
             text-align: center;
-            padding: 2rem;
-        }   
-
-        .error-code {
-            font-size: 8rem;
-            font-weight: 800;
-            color: #2ed573;
-            text-shadow: none;
-            line-height: 1;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.05em;
         }
 
+
         .error-emoji {
-            font-size: 6rem;
-            color: #2ed573;
             display: block;
-            margin: 1rem 0;
+            margin-bottom: clamp(-0.25rem, -0.5vw, 0rem);
+            color: rgba(57, 255, 20, 0.82);
+            font-size: clamp(2rem, 7vw, 4.25rem);
+            line-height: 1;
+            filter: contrast(1.5);
+            text-shadow:
+                2px 0 0 rgba(34, 255, 104, 0.85),
+                -2px 0 0 rgba(2, 80, 30, 0.9),
+                0 0 12px rgba(57, 255, 20, 0.55),
+                0 2px 0 #000;
+            animation: microGlitch 1.35s steps(2, end) infinite;
+        }
+
+        .black-hole-scene {
+            position: relative;
+            display: grid;
+            width: clamp(250px, 54vw, 430px);
+            height: clamp(220px, 43vw, 340px);
+            margin: clamp(0.1rem, 1vw, 0.45rem) 0 clamp(0.4rem, 2vw, 0.9rem);
+            place-items: center;
+            pointer-events: none;
+        }
+
+
+
+        .error-code {
+            position: absolute;
+            inset: 50% auto auto 50%;
+            z-index: 1;
+            color: rgba(34, 255, 104, 0.045);
+            font-size: clamp(10rem, 38vw, 31.25rem);
+            font-weight: 800;
+            line-height: 0.8;
+            letter-spacing: 0.02em;
+            opacity: 0.15;
+            text-shadow:
+                4px 0 0 rgba(57, 255, 20, 0.12),
+                -4px 0 0 rgba(0, 45, 16, 0.48),
+                0 0 10px rgba(57, 255, 20, 0.12);
+            transform: translate(-50%, -50%);
+            -webkit-text-stroke: 1px rgba(57, 255, 20, 0.12);
+            animation: codeGlitch 2.2s steps(2, end) infinite;
+        }
+
+        .black-hole-core {
+            position: relative;
+            z-index: 3;
+            display: grid;
+            place-items: center;
+            filter: contrast(1.7) drop-shadow(0 0 18px rgba(57, 255, 20, 0.42));
+            animation: gravityPulse 1.15s steps(3, end) infinite;
+        }
+
+        .ring-3,
+        .ring-2,
+        .ring-1 {
+            position: relative;
+            border-radius: 50%;
+            padding: clamp(2px, 0.55vw, 4px);
+        }
+
+        .ring-3 {
+            box-shadow:
+                0 0 0 2px rgba(57, 255, 20, 0.9),
+                0 0 0 12px #000,
+                0 0 26px 10px rgba(57, 255, 20, 0.8),
+                0 0 0 18px rgba(0, 0, 0, 0.72);
+        }
+
+        .ring-2 {
+            box-shadow:
+                0 0 0 9px #000,
+                0 0 0 11px rgba(34, 255, 104, 0.35);
+        }
+
+        .ring-1 {
+            box-shadow:
+                0 0 0 2px rgba(234, 255, 239, 0.76),
+                0 0 0 9px #000,
+                0 0 18px 7px rgba(57, 255, 20, 0.62);
+        }
+
+        .black-hole {
+            width: clamp(82px, 18vw, 128px);
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 42% 34%, rgba(57, 255, 20, 0.08), transparent 18%),
+                #000;
+            box-shadow:
+                0 0 0 13px #000,
+                0 0 28px 10px rgba(57, 255, 20, 0.52),
+                inset 0 0 0 1px rgba(234, 255, 239, 0.7),
+                inset 0 0 18px rgba(34, 255, 104, 0.18);
+        }
+
+        .glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: -1;
+            width: clamp(230px, 56vw, 360px);
+            height: clamp(230px, 56vw, 360px);
+            border-radius: 50%;
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(57, 255, 20, 0.12) 0 7%,
+                    rgba(0, 0, 0, 0.76) 8% 20%,
+                    rgba(34, 255, 104, 0.08) 21% 38%,
+                    transparent 39% 100%
+                );
+            transform: translate(-50%, -50%);
+        }
+
+        .accretion-orbit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 3;
+            width: 1px;
+            height: 1px;
+            transform: translate(-50%, -50%) rotateX(75deg);
+            transform-style: preserve-3d;
+        }
+
+        .crescent {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: clamp(150px, 33vw, 220px);
+            height: clamp(9px, 1.6vw, 13px);
+            color: transparent !important;
+            opacity: 0;
+            clip-path: ellipse(60% 100% at 100% 50%);
+            filter:
+                drop-shadow(0 0 4px rgba(234, 255, 239, 0.85))
+                drop-shadow(0 0 13px rgba(57, 255, 20, 0.92))
+                drop-shadow(0 0 24px rgba(57, 255, 20, 0.72));
+            offset-distance: 0%;
+            offset-path: path("M 0,-102 A 116,86 0 1,1 0,102 A 116,86 0 1,1 0,-102 Z");
+            transform: rotate(180deg);
+        }
+
+        .crescent path {
+            fill: rgba(57, 255, 20, 0.74);
+        }
+
+        .crescent-1 {
+            animation: moveOval 680ms ease-in-out 0ms infinite;
+        }
+
+        .crescent-2 {
+            animation: moveOval 680ms ease-in-out 113ms infinite;
+        }
+
+        .crescent-3 {
+            animation: moveOval 680ms ease-in-out 227ms infinite;
+        }
+
+        .crescent-4 {
+            animation: moveOval 680ms ease-in-out 340ms infinite;
+        }
+
+        .crescent-5 {
+            animation: moveOval 680ms ease-in-out 453ms infinite;
+        }
+
+        .crescent-6 {
+            animation: moveOval 680ms ease-in-out 567ms infinite;
         }
 
         .error-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #e6f1ec;
-            margin-bottom: 1rem;
+            max-width: 100%;
+            margin-bottom: -0.1rem;
+            position: relative;
+            display: inline-block;
+            color: var(--green-hard);
+            font-size: clamp(1.45rem, 5vw, 2.35rem);
+            font-weight: 800;
+            line-height: 1.12;
+            letter-spacing: 0.14em;
             text-transform: uppercase;
-            letter-spacing: 0.2em;
+            text-shadow: none;
+            isolation: isolate;
+            opacity: 0.25;
+        }
+
+        .error-title::before,
+        .error-title::after {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .error-title::before {
+            content: attr(data-text);
+            z-index: -1;
+            color: var(--green-hard);
+            clip-path: inset(38% 0 35% 0);
+            transform: translate(-0.16em, 0);
+            opacity: 0.96;
+            animation: titleGlitchA 1.15s steps(2, end) infinite;
+        }
+
+        .error-title::after {
+            content: "";
+            z-index: 2;
+            background:
+                linear-gradient(
+                    to bottom,
+                    transparent 0 18%,
+                    #000 18% 29%,
+                    transparent 29% 47%,
+                    #000 47% 59%,
+                    transparent 59% 73%,
+                    #000 73% 82%,
+                    transparent 82% 100%
+                );
+            opacity: 0.96;
+            animation: titleGlitchB 1.35s steps(2, end) infinite;
         }
 
         .error-message {
-            font-size: 1.2rem;
-            color: #8aa595;
-            margin-bottom: 2rem;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
+            max-width: 430px;
+            color: var(--text-muted);
+            font-size: clamp(1rem, 2.8vw, 1.2rem);
+            line-height: 1.45;
+            text-shadow:
+                1px 0 0 rgba(57, 255, 20, 0.28),
+                0 2px 0 #000;
         }
 
+        @keyframes gravityPulse {
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+            33% {
+                transform: translate(1px, -1px) scale(1.015);
+            }
+            50% {
+                filter: saturate(1.65) contrast(1.7);
+                transform: translate(-1px, 1px) scale(1.03);
+            }
+            66% {
+                transform: translate(2px, 0) scale(0.995);
+            }
+        }
+
+        @keyframes moveOval {
+            18% {
+                offset-distance: 25%;
+                opacity: 0;
+            }
+            25% {
+                opacity: 1;
+            }
+            75% {
+                opacity: 1;
+            }
+            100% {
+                offset-distance: 90%;
+                opacity: 0;
+            }
+        }
+
+        @keyframes microGlitch {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            30% {
+                transform: translateX(-2px);
+            }
+            31% {
+                transform: translateX(3px);
+            }
+            63% {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes codeGlitch {
+            0%,
+            100% {
+                clip-path: inset(0 0 0 0);
+                transform: translate(-50%, -50%);
+            }
+            28% {
+                clip-path: inset(10% 0 24% 0);
+                transform: translate(calc(-50% + 3px), calc(-50% - 1px));
+            }
+            29% {
+                clip-path: inset(48% 0 7% 0);
+                transform: translate(calc(-50% - 4px), calc(-50% + 1px));
+            }
+            61% {
+                clip-path: inset(0 0 0 0);
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        @keyframes titleGlitchA {
+            0%,
+            100% {
+                clip-path: inset(38% 0 35% 0);
+                transform: translate(-0.16em, 0);
+            }
+            42% {
+                clip-path: inset(24% 0 56% 0);
+                transform: translate(0.18em, 0);
+            }
+            43% {
+                clip-path: inset(61% 0 20% 0);
+                transform: translate(-0.08em, 0);
+            }
+        }
+
+        @keyframes titleGlitchB {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            38% {
+                transform: translateX(0.12em);
+            }
+            39% {
+                transform: translateX(-0.08em);
+            }
+        }
+
+        @keyframes glitchBarTop {
+            0%,
+            100% {
+                transform: translateX(-50%);
+                opacity: 0.42;
+            }
+            44% {
+                transform: translateX(calc(-50% - 22px));
+                opacity: 0.9;
+            }
+            45% {
+                transform: translateX(calc(-50% + 14px));
+                opacity: 0.25;
+            }
+        }
+
+        @keyframes glitchBarBottom {
+            0%,
+            100% {
+                transform: translateX(-50%);
+                opacity: 0.34;
+            }
+            58% {
+                transform: translateX(calc(-50% + 30px));
+                opacity: 0.95;
+            }
+            59% {
+                transform: translateX(calc(-50% - 18px));
+                opacity: 0.2;
+            }
+        }
 
         @media (max-width: 600px) {
-            .error-code {
-                font-size: 5rem;
+            .error-page {
+                padding: 1.25rem;
             }
-            .error-emoji {
-                font-size: 4rem;
-            }
+
             .error-title {
-                font-size: 1.5rem;
+                letter-spacing: 0.1em;
             }
+
             .error-message {
-                font-size: 1rem;
+                max-width: 20rem;
+            }
+
+            .accretion-orbit {
+                transform: translate(-50%, -50%) rotateX(75deg) scale(0.82);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .error-page::before,
+            .error-page::after,
+            .black-hole-core,
+            .crescent,
+            .error-emoji,
+            .error-code,
+            .error-title::before,
+            .error-title::after,
+            .black-hole-scene::before,
+            .black-hole-scene::after {
+                animation: none;
+            }
+
+            .crescent {
+                opacity: 0.55;
+                offset-distance: 52%;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="error-content">
-            <span class="error-emoji">¯\_(ツ)_/¯</span>
-            <h1 class="error-title">Кто здесь?</h1>
-            <p class="error-message">Кажется, эта страница ушла в отпуск без вести... или её съел баг!</p>
-        </div>
-    </div>
+    <main class="error-page">
+        <section class="error-content" aria-labelledby="error-title">
+            <span class="error-emoji" aria-hidden="true">¯\_(ツ)_/¯</span>
+
+            <div class="black-hole-scene" aria-hidden="true">
+                <div class="error-code">404</div>
+
+                <div class="black-hole-core">
+                    <div class="ring-3">
+                        <div class="ring-2">
+                            <div class="ring-1">
+                                <div class="black-hole"></div>
+                                <div class="glow"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accretion-orbit">
+                    <svg class="crescent crescent-1" viewBox="0 0 50 50">
+                        <path d="M 0 0 C 54 50 185 57 226 0 C 198 39 35 32 0 0"></path>
+                    </svg>
+                    <svg class="crescent crescent-2" viewBox="0 0 50 50">
+                        <path d="M 0 0 C 54 50 185 57 226 0 C 198 39 35 32 0 0"></path>
+                    </svg>
+                    <svg class="crescent crescent-3" viewBox="0 0 50 50">
+                        <path d="M 0 0 C 54 50 185 57 226 0 C 198 39 35 32 0 0"></path>
+                    </svg>
+                    <svg class="crescent crescent-4" viewBox="0 0 50 50">
+                        <path d="M 0 0 C 54 50 185 57 226 0 C 198 39 35 32 0 0"></path>
+                    </svg>
+                    <svg class="crescent crescent-5" viewBox="0 0 50 50">
+                        <path d="M 0 0 C 54 50 185 57 226 0 C 198 39 35 32 0 0"></path>
+                    </svg>
+                    <svg class="crescent crescent-6" viewBox="0 0 50 50">
+                        <path d="M 0 0 C 54 50 185 57 226 0 C 198 39 35 32 0 0"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <h1 class="error-title" id="error-title" data-text="Кто здесь?">Кто здесь?</h1>
+            <p class="error-message">Видимо, ты забрел куда не следовало...</p>
+        </section>
+    </main>
 </body>
 </html>
