@@ -141,9 +141,22 @@ textarea {
 }
 
 .card {
+    --card-corner-color: rgba(46, 213, 115, 0.58);
+    --card-corner-long: 1.15rem;
+    --card-corner-thick: 2px;
+    position: relative;
     width: 100%;
     padding: clamp(1rem, 2.3vw, 1.7rem);
-    background: var(--bg-card);
+    background:
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) top left / var(--card-corner-long) var(--card-corner-thick) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) top left / var(--card-corner-thick) var(--card-corner-long) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) top right / var(--card-corner-long) var(--card-corner-thick) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) top right / var(--card-corner-thick) var(--card-corner-long) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) bottom left / var(--card-corner-long) var(--card-corner-thick) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) bottom left / var(--card-corner-thick) var(--card-corner-long) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) bottom right / var(--card-corner-long) var(--card-corner-thick) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) bottom right / var(--card-corner-thick) var(--card-corner-long) no-repeat,
+        var(--bg-card);
     border: 1px solid rgba(46, 213, 115, 0.34);
     border-radius: var(--radius);
     box-shadow: var(--shadow-soft);
@@ -151,12 +164,33 @@ textarea {
 }
 
 .discord-card {
+    position: relative;
     width: 100%;
     overflow: hidden;
     background: rgba(0, 0, 0, 0.58);
     border: 1px solid rgba(46, 213, 115, 0.14);
     border-radius: 0;
     box-shadow: none;
+}
+
+.discord-card::before {
+    --card-corner-color: rgba(46, 213, 115, 0.34);
+    --card-corner-long: 0.85rem;
+    --card-corner-thick: 1px;
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background:
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) top left / var(--card-corner-long) var(--card-corner-thick) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) top left / var(--card-corner-thick) var(--card-corner-long) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) top right / var(--card-corner-long) var(--card-corner-thick) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) top right / var(--card-corner-thick) var(--card-corner-long) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) bottom left / var(--card-corner-long) var(--card-corner-thick) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) bottom left / var(--card-corner-thick) var(--card-corner-long) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) bottom right / var(--card-corner-long) var(--card-corner-thick) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) bottom right / var(--card-corner-thick) var(--card-corner-long) no-repeat;
 }
 
 .discord-banner {
@@ -513,11 +547,23 @@ textarea {
 
 .player-card,
 .player-card-sm {
-    border: 1px solid rgb(165 255 86 / 10%);
-    border-radius: 1rem;
-    background: rgb(6 11 6);
+    --card-corner-color: rgba(46, 213, 115, 0.48);
+    --card-corner-long: 0.9rem;
+    --card-corner-thick: 2px;
+    border: 1px solid rgba(46, 213, 115, 0.22);
+    border-radius: var(--radius);
+    background:
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) top left / var(--card-corner-long) var(--card-corner-thick) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) top left / var(--card-corner-thick) var(--card-corner-long) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) top right / var(--card-corner-long) var(--card-corner-thick) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) top right / var(--card-corner-thick) var(--card-corner-long) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) bottom left / var(--card-corner-long) var(--card-corner-thick) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) bottom left / var(--card-corner-thick) var(--card-corner-long) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) bottom right / var(--card-corner-long) var(--card-corner-thick) no-repeat,
+        linear-gradient(var(--card-corner-color), var(--card-corner-color)) bottom right / var(--card-corner-thick) var(--card-corner-long) no-repeat,
+        rgb(6 11 6);
     text-align: center;
-    box-shadow: 5px 8px 0 rgb(0 0 0)
+    box-shadow: 5px 8px 0 rgb(0 0 0);
 }
 
 .player-card {
@@ -1010,7 +1056,7 @@ textarea {
 
     .card {
         padding: 1rem;
-        border-radius: 1rem;
+        border-radius: var(--radius);
     }
 
     .avatar-row {
