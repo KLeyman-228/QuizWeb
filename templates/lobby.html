@@ -15,12 +15,33 @@
 <div id="question" class="card hidden"></div>
 <div id="leaderboard" class="card hidden"></div>
 
-<div class="card">
-    <div class="text-sm font-bold mb-2 text-muted">Чат</div>
-    <div id="chat-messages" class="chat-messages"></div>
-    <div class="chat-input-row">
-        <input id="chat-input" type="text" maxlength="200" placeholder="Сообщение..." class="input">
-        <button id="chat-send" type="button" class="btn btn-primary">→</button>
+<div class="chat-console-shell">
+    <div class="card chat-console" aria-label="Chat">
+        <span class="chat-corner chat-corner-tl"></span>
+        <span class="chat-corner chat-corner-tr"></span>
+        <span class="chat-corner chat-corner-bl"></span>
+        <span class="chat-corner chat-corner-br"></span>
+        <span class="chat-scanline"></span>
+        <span class="chat-bar chat-bar-top-1"></span>
+        <span class="chat-bar chat-bar-top-2"></span>
+        <span class="chat-bar chat-bar-top-3"></span>
+        <span class="chat-bar chat-bar-bottom-1"></span>
+        <span class="chat-bar chat-bar-bottom-2"></span>
+        <span class="chat-bar chat-bar-bottom-3"></span>
+
+        <div class="chat-console-label">
+            <span class="chat-label-arrow">&gt;</span>
+            <span>ROOM_CHAT</span>
+            <span class="chat-console-cursor" aria-hidden="true"></span>
+        </div>
+
+        <div id="chat-messages" class="chat-messages" role="log" aria-live="polite"></div>
+
+        <div class="chat-input-row chat-console-input">
+            <span class="chat-prompt" aria-hidden="true">$</span>
+            <input id="chat-input" type="text" maxlength="200" placeholder="ENTER MESSAGE" class="input" autocomplete="off">
+            <button id="chat-send" type="button" class="btn btn-primary" aria-label="Send message">&gt;&gt;</button>
+        </div>
     </div>
 </div>
 
