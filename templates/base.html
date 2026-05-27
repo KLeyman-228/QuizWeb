@@ -5,6 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Квиз{% endblock %}</title>
+    <meta property="og:title" content="Phys-Dev Quiz">
+    <meta property="og:description" content="Викторина от Game.dev & LatticeLab">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:image" content="https://phys-dev-quiz.ru/static/img/share-preview.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Phys-Dev Quiz">
+    <meta name="twitter:description" content="Викторина от Game.dev & LatticeLab">
+    <meta name="twitter:image" content="https://phys-dev-quiz.ru/static/img/share-preview.png">
     <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
