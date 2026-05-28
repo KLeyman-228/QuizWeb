@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from GameQuiz.asgi import application
 from .consumers import DEFAULT_PLAYER_NAME, QUESTION_DURATION_SECONDS, QUESTION_REVEAL_SECONDS
-from .models import AVATARS_LIST, Lobby, Player, Question
+from .models import AVATARS_LIST, Lobby, Player, Question, REACTIONS_LIST
 
 
 class LobbyViewTests(TestCase):
@@ -22,6 +22,21 @@ class LobbyViewTests(TestCase):
         response = self.client.get("/lobby/ABC123/")
 
         self.assertEqual(response.status_code, 404)
+
+    def test_host_can_get_lobby_qr_svg(self):
+        lobby = Lobby.objects.create(code="ABC123")
+        host_user = get_user_model().objects.create_superuser(
+            username="host",
+            email="host@example.com",
+            password="password",
+        )
+        self.client.force_login(host_user)
+
+        response = self.client.get(f"/api/lobby/{lobby.code}/qr.svg")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "image/svg+xml")
+        self.assertIn(b"<svg", response.content)
 
 
 class QuizConsumerTests(TransactionTestCase):
@@ -215,6 +230,38 @@ class QuizConsumerTests(TransactionTestCase):
         await self.receive_by_type(player, "game_finished")
         await player.disconnect()
         await host.disconnect()
+
+    def test_reaction_broadcasts_to_lobby(self):
+        async_to_sync(self._test_reaction_broadcasts_to_lobby)()
+
+    async def _test_reaction_broadcasts_to_lobby(self):
+        sender = await self.connect_socket()
+        await sender.send_json_to({
+            "type": "join_player",
+            "name": "Mira",
+            "avatar": AVATARS_LIST[2],
+        })
+        await self.receive_by_type(sender, "your_token")
+
+        receiver = await self.connect_socket()
+        await receiver.send_json_to({
+            "type": "join_player",
+            "name": "Nika",
+            "avatar": AVATARS_LIST[3],
+        })
+        await self.receive_by_type(receiver, "your_token")
+
+        await sender.send_json_to({
+            "type": "send_reaction",
+            "emoji": REACTIONS_LIST[0],
+        })
+
+        reaction = await self.receive_by_type(receiver, "reaction")
+        self.assertEqual(reaction["emoji"], REACTIONS_LIST[0])
+        self.assertEqual(reaction["player"]["name"], "Mira")
+
+        await sender.disconnect()
+        await receiver.disconnect()
 
     async def connect_socket(self, user=None):
         communicator = WebsocketCommunicator(application, f"/ws/lobby/{self.lobby.code}/")

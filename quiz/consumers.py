@@ -7,13 +7,14 @@ from django.db import transaction
 from django.db.models import F
 from django.utils import timezone
 
-from .models import AVATARS_LIST, Lobby, Player, Question
+from .models import AVATARS_LIST, Lobby, Player, Question, REACTIONS_LIST
 
 
 QUESTION_DURATION_SECONDS = 15
 QUESTION_REVEAL_SECONDS = 3
 QUESTIONS_PER_GAME = 5
 DEFAULT_PLAYER_NAME = "Игрок"
+REACTION_COOLDOWN_SECONDS = 0.35
 
 
 def normalize_player_name(value):
@@ -23,6 +24,10 @@ def normalize_player_name(value):
 
 def normalize_avatar(value):
     return value if value in AVATARS_LIST else AVATARS_LIST[0]
+
+
+def normalize_reaction(value):
+    return value if value in REACTIONS_LIST else None
 
 
 def serialize_datetime(value):
@@ -126,6 +131,9 @@ class QuizConsumer(AsyncWebsocketConsumer):
             return
         if data_type == "send_message":
             await self.handle_chat_message(data)
+            return
+        if data_type == "send_reaction":
+            await self.handle_reaction(data)
             return
         if data_type == "timer_expired":
             await self.handle_timer_expired()
@@ -276,6 +284,30 @@ class QuizConsumer(AsyncWebsocketConsumer):
                 "type": "chat_message",
                 "player": player,
                 "text": text,
+            },
+        )
+
+    async def handle_reaction(self, data):
+        emoji = normalize_reaction(data.get("emoji"))
+        if not emoji:
+            return
+
+        now = timezone.now()
+        last_reaction_at = getattr(self, "last_reaction_at", None)
+        if last_reaction_at and (now - last_reaction_at).total_seconds() < REACTION_COOLDOWN_SECONDS:
+            return
+        self.last_reaction_at = now
+
+        player = await db_get_player_by_channel(self.channel_name)
+        if not player:
+            return
+
+        await self.channel_layer.group_send(
+            self.group_name,
+            {
+                "type": "reaction_event",
+                "player": player,
+                "emoji": emoji,
             },
         )
 
@@ -440,6 +472,13 @@ class QuizConsumer(AsyncWebsocketConsumer):
             "type": "chat_message",
             "player": event["player"],
             "text": event["text"],
+        })
+
+    async def reaction_event(self, event):
+        await self.send_json({
+            "type": "reaction",
+            "player": event["player"],
+            "emoji": event["emoji"],
         })
 
     async def game_finished_event(self, event):

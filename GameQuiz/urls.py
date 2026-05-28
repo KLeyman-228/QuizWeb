@@ -26,4 +26,5 @@ urlpatterns = [
     path("lobby/<str:code>/", views.lobby_view, name="lobby"),
     path("host/<str:code>/", views.host_view, name="host"),
     path("api/new-lobby/", views.new_lobby_api, name="new-lobby"),
+    path("api/lobby/<str:code>/qr.svg", views.lobby_qr_api, name="lobby-qr"),
 ]

@@ -1,0 +1,6 @@
+<div id="reaction-stream" class="reaction-stream" aria-live="polite" aria-atomic="false"></div>
+<div class="reaction-dock" aria-label="Reactions">
+    {% for reaction in reactions %}
+    <button type="button" class="reaction-btn" data-reaction="{{ reaction }}" aria-label="Reaction {{ reaction }}">{{ reaction }}</button>
+    {% endfor %}
+</div>

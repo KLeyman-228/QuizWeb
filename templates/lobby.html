@@ -45,9 +45,12 @@
     </div>
 </div>
 
+{% include "includes/reactions.html" %}
+
 {% endblock %}
 
 {% block extra_js %}
 <script>window.LOBBY_CODE = "{{ code }}";</script>
 <script src="{% static 'js/lobby.js' %}"></script>
+<script src="{% static 'js/reactions.js' %}"></script>
 {% endblock %}

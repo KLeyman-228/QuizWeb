@@ -8,6 +8,8 @@ import uuid
 AVATARS_LIST = ['🦊', '🐺', '🦁', '🐯', '🐻', '🦝', '🐸', 
                 '🦄', '🐲', '👾', '🦐', '🦎', '👽', '🐧', '💀', '🦉', '🐛', '🐍']
 
+REACTIONS_LIST = ['🔥', '👏', '😂', '🤯', '💚', '⚡', '🎯', '✨']
+
 
 def generate_player_token():
     return uuid.uuid4().hex

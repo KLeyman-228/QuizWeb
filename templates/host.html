@@ -11,6 +11,14 @@
     </div>
 </div>
 
+<div class="host-entry-card card">
+    <img class="host-entry-qr" src="{{ qr_url }}" alt="QR-код комнаты {{ code }}">
+    <div class="host-entry-meta">
+        <div class="host-entry-code">{{ code }}</div>
+        <a class="host-entry-link" href="{{ lobby_url }}" target="_blank" rel="noopener noreferrer">{{ lobby_url }}</a>
+    </div>
+</div>
+
 <div id="players" class="players-grid-host"></div>
 <div id="question" class="card hidden"></div>
 <div id="leaderboard" class="card hidden"></div>
@@ -45,9 +53,12 @@
     </div>
 </div>
 
+{% include "includes/reactions.html" %}
+
 {% endblock %}
 
 {% block extra_js %}
 <script>window.LOBBY_CODE = "{{ code }}";</script>
 <script src="{% static 'js/host.js' %}"></script>
+<script src="{% static 'js/reactions.js' %}"></script>
 {% endblock %}

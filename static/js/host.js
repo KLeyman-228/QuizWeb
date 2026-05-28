@@ -14,6 +14,7 @@ function wsSend(data) {
         ws.send(JSON.stringify(data));
     }
 }
+window.wsSend = wsSend;
 
 function clearQuestionTimer() {
     if (questionTimer) {
@@ -143,6 +144,7 @@ function connect() {
             }
         }
         if (msg.type === "chat_message") appendChatMessage(msg.player, msg.text);
+        if (msg.type === "reaction" && window.spawnReaction) spawnReaction(msg.emoji, msg.player);
     };
 
     ws.onclose = () => {
