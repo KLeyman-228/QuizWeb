@@ -1,4 +1,33 @@
 (function () {
+    const pendingLocalReactionIds = new Set();
+    const ignoredEchoReactionIds = new Set();
+
+    function createReactionId() {
+        if (window.crypto && typeof window.crypto.randomUUID === "function") {
+            return window.crypto.randomUUID();
+        }
+        return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function rememberIgnoredEcho(reactionId) {
+        if (!reactionId) return;
+
+        ignoredEchoReactionIds.add(reactionId);
+        window.setTimeout(() => ignoredEchoReactionIds.delete(reactionId), 5000);
+    }
+
+    function moveReactionLayerToBody() {
+        const stream = document.getElementById("reaction-stream");
+        const dock = document.querySelector(".reaction-dock");
+
+        if (stream && stream.parentElement !== document.body) {
+            document.body.appendChild(stream);
+        }
+        if (dock && dock.parentElement !== document.body) {
+            document.body.appendChild(dock);
+        }
+    }
+
     function getPageRect() {
         const container = document.querySelector(".page-container");
         const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
@@ -28,15 +57,33 @@
     }
 
     function setupReactionDock() {
+        moveReactionLayerToBody();
         positionReactionDock();
         window.addEventListener("resize", positionReactionDock);
 
         document.querySelectorAll("[data-reaction]").forEach((button) => {
             button.addEventListener("click", () => {
                 const emoji = button.dataset.reaction;
-                if (!emoji || typeof window.wsSend !== "function") return;
+                if (!emoji) return;
 
-                window.wsSend({ type: "send_reaction", emoji });
+                const reactionId = createReactionId();
+                const sent = typeof window.wsSend === "function"
+                    ? window.wsSend({ type: "send_reaction", emoji, reaction_id: reactionId }) === true
+                    : false;
+
+                if (sent) {
+                    pendingLocalReactionIds.add(reactionId);
+                    window.setTimeout(() => {
+                        if (!pendingLocalReactionIds.has(reactionId)) return;
+
+                        pendingLocalReactionIds.delete(reactionId);
+                        rememberIgnoredEcho(reactionId);
+                        spawnReaction(emoji);
+                    }, 450);
+                } else {
+                    spawnReaction(emoji);
+                }
+
                 button.classList.add("is-pulsing");
                 window.setTimeout(() => button.classList.remove("is-pulsing"), 180);
             });
@@ -63,11 +110,34 @@
         window.setTimeout(() => item.remove(), 2600);
     }
 
+    function receiveReaction(emoji, player, reactionId) {
+        if (reactionId && ignoredEchoReactionIds.has(reactionId)) return;
+
+        if (reactionId) {
+            pendingLocalReactionIds.delete(reactionId);
+        }
+        spawnReaction(emoji, player);
+    }
+
+    function flushPendingReactions() {
+        const queue = window.pendingReactions || [];
+        window.pendingReactions = [];
+
+        queue.forEach((reaction) => {
+            receiveReaction(reaction.emoji, reaction.player, reaction.reactionId);
+        });
+    }
+
     window.spawnReaction = spawnReaction;
+    window.receiveReaction = receiveReaction;
 
     if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", setupReactionDock, { once: true });
+        document.addEventListener("DOMContentLoaded", () => {
+            setupReactionDock();
+            flushPendingReactions();
+        }, { once: true });
     } else {
         setupReactionDock();
+        flushPendingReactions();
     }
 })();

@@ -291,6 +291,11 @@ class QuizConsumer(AsyncWebsocketConsumer):
         emoji = normalize_reaction(data.get("emoji"))
         if not emoji:
             return
+        reaction_id = data.get("reaction_id")
+        if not isinstance(reaction_id, str):
+            reaction_id = None
+        elif len(reaction_id) > 80:
+            reaction_id = reaction_id[:80]
 
         now = timezone.now()
         last_reaction_at = getattr(self, "last_reaction_at", None)
@@ -308,6 +313,7 @@ class QuizConsumer(AsyncWebsocketConsumer):
                 "type": "reaction_event",
                 "player": player,
                 "emoji": emoji,
+                "reaction_id": reaction_id,
             },
         )
 
@@ -479,6 +485,7 @@ class QuizConsumer(AsyncWebsocketConsumer):
             "type": "reaction",
             "player": event["player"],
             "emoji": event["emoji"],
+            "reaction_id": event.get("reaction_id"),
         })
 
     async def game_finished_event(self, event):

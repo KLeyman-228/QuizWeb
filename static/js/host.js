@@ -12,9 +12,21 @@ let revealExpiredSentFor = null;
 function wsSend(data) {
     if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify(data));
+        return true;
     }
+    return false;
 }
 window.wsSend = wsSend;
+
+function showReaction(emoji, player, reactionId) {
+    if (typeof window.receiveReaction === "function") {
+        window.receiveReaction(emoji, player, reactionId);
+        return;
+    }
+
+    window.pendingReactions = window.pendingReactions || [];
+    window.pendingReactions.push({ emoji, player, reactionId });
+}
 
 function clearQuestionTimer() {
     if (questionTimer) {
@@ -144,7 +156,7 @@ function connect() {
             }
         }
         if (msg.type === "chat_message") appendChatMessage(msg.player, msg.text);
-        if (msg.type === "reaction" && window.spawnReaction) spawnReaction(msg.emoji, msg.player);
+        if (msg.type === "reaction") showReaction(msg.emoji, msg.player, msg.reaction_id);
     };
 
     ws.onclose = () => {
