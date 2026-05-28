@@ -1,6 +1,7 @@
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from urllib.parse import urlencode
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie
 
@@ -22,7 +23,7 @@ def host_view(request, code):
     if not request.user.is_superuser:
         return HttpResponseForbidden("Доступ запрещён")
     lobby = get_object_or_404(Lobby, code=code.upper())
-    lobby_url = request.build_absolute_uri(reverse("lobby", args=[lobby.code]))
+    lobby_url = request.build_absolute_uri(f"{reverse('index')}?{urlencode({'code': lobby.code})}")
     return render(
         request,
         "host.html",
@@ -49,7 +50,7 @@ def lobby_qr_api(request, code):
         return HttpResponseForbidden("Доступ запрещён")
 
     lobby = get_object_or_404(Lobby, code=code.upper())
-    lobby_url = request.build_absolute_uri(reverse("lobby", args=[lobby.code]))
+    lobby_url = request.build_absolute_uri(f"{reverse('index')}?{urlencode({'code': lobby.code})}")
     return HttpResponse(make_qr_svg(lobby_url), content_type="image/svg+xml")
 
 

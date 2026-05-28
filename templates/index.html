@@ -39,6 +39,12 @@
 <script>
 let selectedAvatar = "{{ avatars.0|escapejs }}";
 const csrfToken = "{{ csrf_token }}";
+const codeInput = document.getElementById("code");
+const initialCode = new URLSearchParams(window.location.search).get("code");
+
+if (initialCode) {
+    codeInput.value = initialCode.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+}
 
 document.querySelectorAll(".avatar-btn").forEach((button) => {
     button.onclick = () => {
@@ -49,7 +55,7 @@ document.querySelectorAll(".avatar-btn").forEach((button) => {
 });
 
 document.getElementById("join-btn").onclick = () => {
-    const code = document.getElementById("code").value.toUpperCase().trim();
+    const code = codeInput.value.toUpperCase().trim();
     const name = document.getElementById("name").value.trim();
 
     if (code.length !== 6 || !name) {
