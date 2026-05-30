@@ -50,10 +50,7 @@
         const dock = document.querySelector(".reaction-dock");
         if (!dock) return;
 
-        const rect = getPageRect();
-        const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
-        const rightOffset = Math.max(8, viewportWidth - rect.right + 10);
-        dock.style.setProperty("--reaction-dock-right", `${rightOffset}px`);
+        dock.style.setProperty("--reaction-dock-right", "0px");
     }
 
     function setupReactionDock() {

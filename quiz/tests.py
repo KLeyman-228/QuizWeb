@@ -84,6 +84,7 @@ class QuizConsumerTests(TransactionTestCase):
 
         await host.send_json_to({"type": "start_game"})
         host_question = await self.receive_by_type(host, "question_show")
+        self.assertIn("leaderboard", host_question)
         await self.receive_by_type(host, "answer_stats")
 
         late_player = await self.connect_socket()
@@ -109,6 +110,8 @@ class QuizConsumerTests(TransactionTestCase):
         })
         stats = await self.receive_by_type(host, "answer_stats")
         self.assertEqual(stats["stats"][str(current_question.correct_index)], 1)
+        self.assertEqual(stats["leaderboard"][0]["name"], "Late")
+        self.assertGreater(stats["leaderboard"][0]["exp"], 0)
 
         await host.send_json_to({"type": "finish_game"})
         await self.receive_by_type(host, "game_finished")

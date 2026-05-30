@@ -789,6 +789,83 @@ textarea {
     outline: none;
 }
 
+.host-game-panel {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+    gap: 1rem;
+    align-items: start;
+}
+
+.host-game-panel #question {
+    min-width: 0;
+}
+
+.host-live-leaderboard.card {
+    position: sticky;
+    top: 1rem;
+    padding: 1rem;
+}
+
+.host-live-leaderboard-title {
+    margin: 0 0 0.85rem;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.host-live-leaderboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.host-live-leaderboard-row {
+    display: grid;
+    grid-template-columns: 1.7rem 1.7rem minmax(0, 1fr) auto;
+    gap: 0.5rem;
+    align-items: center;
+    min-height: 2.35rem;
+    padding: 0.45rem 0.55rem;
+    border: 1px solid rgba(46, 213, 115, 0.2);
+    background: rgba(46, 213, 115, 0.055);
+}
+
+.host-live-rank {
+    color: var(--text-dim);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-align: center;
+}
+
+.host-live-avatar {
+    font-size: 1.15rem;
+    line-height: 1;
+    text-align: center;
+}
+
+.host-live-name {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--text-main);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.host-live-score {
+    font-size: 0.92rem;
+    font-weight: 800;
+}
+
+.host-live-leaderboard-empty {
+    color: var(--text-dim);
+    font-size: 0.82rem;
+}
+
 .chat-console-shell {
     width: 100%;
 }
@@ -1081,7 +1158,7 @@ textarea {
 .reaction-dock {
     position: fixed;
     top: 50%;
-    right: var(--reaction-dock-right, max(0.7rem, env(safe-area-inset-right)));
+    right: var(--reaction-dock-right, max(0px, env(safe-area-inset-right)));
     z-index: 1000;
     display: flex;
     flex-direction: column;
@@ -1229,8 +1306,17 @@ textarea {
         width: 96px;
     }
 
+    .host-game-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .host-live-leaderboard.card {
+        position: static;
+        padding: 0.9rem;
+    }
+
     .reaction-dock {
-        right: 0.45rem;
+        right: 0;
         padding: 0.38rem;
         gap: 0.34rem;
     }

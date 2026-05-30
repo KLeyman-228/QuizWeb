@@ -34,6 +34,10 @@ def serialize_datetime(value):
     return value.isoformat() if value else None
 
 
+def serialize_leaderboard(leaderboard):
+    return [player for player in (leaderboard or []) if not player["is_host"]]
+
+
 def serialize_question(question):
     if not question:
         return None
@@ -51,8 +55,8 @@ def serialize_question(question):
     }
 
 
-def build_question_message(question, index):
-    return {
+def build_question_message(question, index, leaderboard=None):
+    message = {
         "type": "question_show",
         "question": question["safe"],
         "index": index,
@@ -62,6 +66,9 @@ def build_question_message(question, index):
         "duration_seconds": QUESTION_DURATION_SECONDS,
         "reveal_seconds": QUESTION_REVEAL_SECONDS,
     }
+    if leaderboard is not None:
+        message["leaderboard"] = serialize_leaderboard(leaderboard)
+    return message
 
 
 def build_reveal_message(question):
@@ -77,7 +84,7 @@ def build_reveal_message(question):
 def build_game_finished_message(leaderboard):
     return {
         "type": "game_finished",
-        "leaderboard": [player for player in leaderboard if not player["is_host"]],
+        "leaderboard": serialize_leaderboard(leaderboard),
     }
 
 
@@ -414,7 +421,8 @@ class QuizConsumer(AsyncWebsocketConsumer):
         return result
 
     async def send_question_message(self, question, index):
-        await self.send_json(build_question_message(question, index))
+        leaderboard = await db_get_players_serialized(self.lobby.id)
+        await self.send_json(build_question_message(question, index, leaderboard))
 
     async def send_reveal_message(self, question):
         await self.send_json(build_reveal_message(question))
@@ -427,9 +435,10 @@ class QuizConsumer(AsyncWebsocketConsumer):
         )
 
     async def broadcast_question(self, question, index):
+        leaderboard = await db_get_players_serialized(self.lobby.id)
         await self.channel_layer.group_send(
             self.group_name,
-            {"type": "question_show", "message": build_question_message(question, index)},
+            {"type": "question_show", "message": build_question_message(question, index, leaderboard)},
         )
 
     async def broadcast_reveal_answer(self, question):
@@ -440,9 +449,14 @@ class QuizConsumer(AsyncWebsocketConsumer):
 
     async def broadcast_answer_stats(self):
         stats = await db_get_answer_stats(self.lobby.id)
+        leaderboard = await db_get_players_serialized(self.lobby.id)
         await self.channel_layer.group_send(
             self.group_name,
-            {"type": "answer_stats", "stats": stats},
+            {
+                "type": "answer_stats",
+                "stats": stats,
+                "leaderboard": serialize_leaderboard(leaderboard),
+            },
         )
 
     async def broadcast_game_finished(self, leaderboard):
@@ -465,10 +479,13 @@ class QuizConsumer(AsyncWebsocketConsumer):
 
     async def answer_stats(self, event):
         if getattr(self, "is_host", False):
-            await self.send_json({
+            payload = {
                 "type": "answer_stats",
                 "stats": event["stats"],
-            })
+            }
+            if "leaderboard" in event:
+                payload["leaderboard"] = event["leaderboard"]
+            await self.send_json(payload)
 
     async def reveal_answer(self, event):
         await self.send_json(event["message"])

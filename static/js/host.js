@@ -8,6 +8,7 @@ let questionTimer = null;
 let revealTimer = null;
 let timerExpiredSentFor = null;
 let revealExpiredSentFor = null;
+let lastPlayers = [];
 
 function wsSend(data) {
     if (ws && ws.readyState === WebSocket.OPEN) {
@@ -125,6 +126,7 @@ function connect() {
         }
         if (msg.type === "question_show") {
             renderHostQuestion(msg.question, msg.index);
+            renderLiveLeaderboard(msg.leaderboard || lastPlayers);
             currentQuestionId = msg.question_id;
             clearRevealTimer();
             document.getElementById("start-btn").classList.add("hidden");
@@ -137,7 +139,10 @@ function connect() {
                 setTimerLabel("Ответ раскрыт");
             }
         }
-        if (msg.type === "answer_stats") updateStats(msg.stats);
+        if (msg.type === "answer_stats") {
+            updateStats(msg.stats);
+            if (msg.leaderboard) renderLiveLeaderboard(msg.leaderboard);
+        }
         if (msg.type === "game_finished") {
             gameFinished = true;
             clearQuestionTimer();
@@ -222,10 +227,12 @@ document.getElementById("chat-input").addEventListener("keydown", (event) => {
 });
 
 function renderPlayers(players) {
+    lastPlayers = Array.isArray(players) ? players : [];
+
     const box = document.getElementById("players");
     box.innerHTML = "";
 
-    players
+    lastPlayers
         .filter((player) => !player.is_host)
         .forEach((player) => {
             const item = document.createElement("div");
@@ -246,10 +253,19 @@ function renderPlayers(players) {
             item.append(avatar, name, score);
             box.appendChild(item);
         });
+
+    const gamePanel = document.getElementById("host-game-panel");
+    if (gamePanel && !gamePanel.classList.contains("hidden")) {
+        renderLiveLeaderboard(lastPlayers);
+    }
 }
 
 function renderHostQuestion(question, index) {
     document.getElementById("leaderboard").classList.add("hidden");
+    document.getElementById("players").classList.remove("hidden");
+
+    const gamePanel = document.getElementById("host-game-panel");
+    if (gamePanel) gamePanel.classList.remove("hidden");
 
     const box = document.getElementById("question");
     box.classList.remove("hidden");
@@ -295,6 +311,60 @@ function renderHostQuestion(question, index) {
     });
 }
 
+function renderLiveLeaderboard(list) {
+    const box = document.getElementById("host-live-leaderboard");
+    if (!box) return;
+
+    const players = (Array.isArray(list) ? list : [])
+        .filter((player) => !player.is_host)
+        .sort((a, b) => (b.exp || 0) - (a.exp || 0));
+
+    box.classList.remove("hidden");
+    box.textContent = "";
+
+    const title = document.createElement("h2");
+    title.className = "host-live-leaderboard-title";
+    title.textContent = "Текущие очки";
+    box.appendChild(title);
+
+    if (players.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "host-live-leaderboard-empty";
+        empty.textContent = "Игроки появятся здесь";
+        box.appendChild(empty);
+        return;
+    }
+
+    const rows = document.createElement("div");
+    rows.className = "host-live-leaderboard-list";
+
+    players.forEach((player, index) => {
+        const row = document.createElement("div");
+        row.className = "host-live-leaderboard-row";
+
+        const rank = document.createElement("span");
+        rank.className = "host-live-rank";
+        rank.textContent = `${index + 1}`;
+
+        const avatar = document.createElement("span");
+        avatar.className = "host-live-avatar";
+        avatar.textContent = player.avatar;
+
+        const name = document.createElement("span");
+        name.className = "host-live-name";
+        name.textContent = player.name;
+
+        const score = document.createElement("span");
+        score.className = "host-live-score score-text";
+        score.textContent = `${player.exp || 0}`;
+
+        row.append(rank, avatar, name, score);
+        rows.appendChild(row);
+    });
+
+    box.appendChild(rows);
+}
+
 function updateStats(stats) {
     document.querySelectorAll("[data-option-index]").forEach((row) => {
         const index = row.dataset.optionIndex;
@@ -304,8 +374,12 @@ function updateStats(stats) {
 }
 
 function renderLeaderboard(list) {
+    const gamePanel = document.getElementById("host-game-panel");
+    if (gamePanel) gamePanel.classList.add("hidden");
+
     document.getElementById("question").classList.add("hidden");
     document.getElementById("players").classList.add("hidden");
+    document.getElementById("host-live-leaderboard")?.classList.add("hidden");
 
     const box = document.getElementById("leaderboard");
     const sorted = [...list].sort((a, b) => b.exp - a.exp);
