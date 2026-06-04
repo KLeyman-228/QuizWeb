@@ -234,6 +234,87 @@ class QuizConsumerTests(TransactionTestCase):
         await player.disconnect()
         await host.disconnect()
 
+    def test_late_timer_expiration_still_reveals_answer_first(self):
+        async_to_sync(self._test_late_timer_expiration_still_reveals_answer_first)()
+
+    async def _test_late_timer_expiration_still_reveals_answer_first(self):
+        player = await self.connect_socket()
+        await player.send_json_to({
+            "type": "join_player",
+            "name": "Mira",
+            "avatar": AVATARS_LIST[2],
+        })
+        await self.receive_by_type(player, "your_token")
+        await self.receive_by_type(player, "lobby_update")
+
+        host = await self.connect_socket(user=self.host_user)
+        await host.send_json_to({"type": "join_host"})
+        await self.receive_by_type(host, "lobby_update")
+        await self.receive_by_type(player, "lobby_update")
+
+        await host.send_json_to({"type": "start_game"})
+        first_question_player = await self.receive_by_type(player, "question_show")
+        await self.receive_by_type(host, "question_show")
+
+        await self.set_question_times(
+            started_at=timezone.now() - timedelta(seconds=QUESTION_DURATION_SECONDS + QUESTION_REVEAL_SECONDS + 10),
+            revealed_at=None,
+        )
+        await host.send_json_to({"type": "timer_expired", "question_id": first_question_player["question_id"]})
+
+        player_reveal = await self.receive_by_type(player, "reveal_answer")
+        host_reveal = await self.receive_by_type(host, "reveal_answer")
+        self.assertEqual(player_reveal["question_id"], first_question_player["question_id"])
+        self.assertEqual(host_reveal["question_id"], first_question_player["question_id"])
+
+        await host.send_json_to({"type": "finish_game"})
+        await self.receive_by_type(host, "game_finished")
+        await self.receive_by_type(player, "game_finished")
+        await player.disconnect()
+        await host.disconnect()
+
+    def test_host_reconnect_restores_expired_question(self):
+        async_to_sync(self._test_host_reconnect_restores_expired_question)()
+
+    async def _test_host_reconnect_restores_expired_question(self):
+        player = await self.connect_socket()
+        await player.send_json_to({
+            "type": "join_player",
+            "name": "Mira",
+            "avatar": AVATARS_LIST[2],
+        })
+        await self.receive_by_type(player, "your_token")
+        await self.receive_by_type(player, "lobby_update")
+
+        host = await self.connect_socket(user=self.host_user)
+        await host.send_json_to({"type": "join_host"})
+        await self.receive_by_type(host, "lobby_update")
+        await self.receive_by_type(player, "lobby_update")
+
+        await host.send_json_to({"type": "start_game"})
+        first_question_player = await self.receive_by_type(player, "question_show")
+        await self.receive_by_type(host, "question_show")
+        await host.disconnect()
+
+        await self.set_question_times(
+            started_at=timezone.now() - timedelta(seconds=QUESTION_DURATION_SECONDS + 1),
+            revealed_at=None,
+        )
+
+        reconnected_host = await self.connect_socket(user=self.host_user)
+        await reconnected_host.send_json_to({"type": "join_host"})
+
+        restored_question = await self.receive_by_type(reconnected_host, "question_show")
+        restored_reveal = await self.receive_by_type(reconnected_host, "reveal_answer")
+        self.assertEqual(restored_question["question_id"], first_question_player["question_id"])
+        self.assertEqual(restored_reveal["question_id"], first_question_player["question_id"])
+
+        await reconnected_host.send_json_to({"type": "finish_game"})
+        await self.receive_by_type(reconnected_host, "game_finished")
+        await self.receive_by_type(player, "game_finished")
+        await player.disconnect()
+        await reconnected_host.disconnect()
+
     def test_reaction_broadcasts_to_lobby(self):
         async_to_sync(self._test_reaction_broadcasts_to_lobby)()
 

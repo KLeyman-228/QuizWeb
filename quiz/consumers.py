@@ -1,5 +1,6 @@
 import json
-from datetime import timedelta
+import asyncio
+from datetime import datetime, timedelta
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -10,11 +11,12 @@ from django.utils import timezone
 from .models import AVATARS_LIST, Lobby, Player, Question, REACTIONS_LIST
 
 
-QUESTION_DURATION_SECONDS = 15
-QUESTION_REVEAL_SECONDS = 3
-QUESTIONS_PER_GAME = 5
+QUESTION_DURATION_SECONDS = 20
+QUESTION_REVEAL_SECONDS = 10
+QUESTIONS_PER_GAME = 118
 DEFAULT_PLAYER_NAME = "Игрок"
 REACTION_COOLDOWN_SECONDS = 0.35
+TIMING_SYNC_GRACE_SECONDS = 0.35
 
 
 def normalize_player_name(value):
@@ -32,6 +34,15 @@ def normalize_reaction(value):
 
 def serialize_datetime(value):
     return value.isoformat() if value else None
+
+
+def parse_datetime(value):
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def serialize_leaderboard(leaderboard):
@@ -93,6 +104,7 @@ class QuizConsumer(AsyncWebsocketConsumer):
         self.lobby_code = self.scope["url_route"]["kwargs"]["lobby_code"]
         self.group_name = f"lobby_{self.lobby_code}"
         self.added_to_group = False
+        self.timing_sync_task = None
         self.lobby = await db_get_lobby(self.lobby_code)
 
         if not self.lobby:
@@ -104,6 +116,8 @@ class QuizConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, _code):
+        self.cancel_timing_sync()
+
         if not hasattr(self, "group_name") or not getattr(self, "lobby", None):
             return
 
@@ -143,10 +157,10 @@ class QuizConsumer(AsyncWebsocketConsumer):
             await self.handle_reaction(data)
             return
         if data_type == "timer_expired":
-            await self.handle_timer_expired()
+            await self.handle_timer_expired(data)
             return
         if data_type == "reveal_expired":
-            await self.handle_reveal_expired()
+            await self.handle_reveal_expired(data)
             return
 
         if data_type in {"start_game", "next_question", "finish_game"}:
@@ -168,6 +182,62 @@ class QuizConsumer(AsyncWebsocketConsumer):
             getattr(user, "is_authenticated", False)
             and getattr(user, "is_superuser", False)
         )
+
+    def cancel_timing_sync(self):
+        task = getattr(self, "timing_sync_task", None)
+        if task and not task.done():
+            task.cancel()
+        self.timing_sync_task = None
+
+    def schedule_timing_sync(self, question_id, target_at):
+        if not question_id or not target_at:
+            return
+
+        delay = max(0, (target_at - timezone.now()).total_seconds()) + TIMING_SYNC_GRACE_SECONDS
+        self.cancel_timing_sync()
+        self.timing_sync_task = asyncio.create_task(self.run_timing_sync(question_id, delay))
+
+    def schedule_question_sync(self, question_id, started_at):
+        self.schedule_timing_sync(
+            question_id,
+            started_at + timedelta(seconds=QUESTION_DURATION_SECONDS) if started_at else None,
+        )
+
+    def schedule_reveal_sync(self, question_id, revealed_at):
+        self.schedule_timing_sync(
+            question_id,
+            revealed_at + timedelta(seconds=QUESTION_REVEAL_SECONDS) if revealed_at else None,
+        )
+
+    def schedule_from_question_message(self, message):
+        question_id = message.get("question_id")
+        if not question_id:
+            return
+
+        revealed_at = parse_datetime(message.get("revealed_at"))
+        if revealed_at:
+            self.schedule_reveal_sync(question_id, revealed_at)
+            return
+
+        self.schedule_question_sync(question_id, parse_datetime(message.get("started_at")))
+
+    def schedule_from_reveal_message(self, message):
+        self.schedule_reveal_sync(
+            message.get("question_id"),
+            parse_datetime(message.get("revealed_at")),
+        )
+
+    async def run_timing_sync(self, question_id, delay):
+        try:
+            await asyncio.sleep(delay)
+            await self.sync_lobby_timing(expected_question_id=question_id)
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            return
+        finally:
+            if asyncio.current_task() is self.timing_sync_task:
+                self.timing_sync_task = None
 
     async def is_current_host(self):
         if not getattr(self, "is_host", False) or not getattr(self, "player_id", None):
@@ -261,7 +331,12 @@ class QuizConsumer(AsyncWebsocketConsumer):
             await self.send_question_message(question, lobby_state["current_question_index"])
             if getattr(self, "is_host", False):
                 stats = await db_get_answer_stats(self.lobby.id)
-                await self.send_json({"type": "answer_stats", "stats": stats})
+                leaderboard = await db_get_players_serialized(self.lobby.id)
+                await self.send_json({
+                    "type": "answer_stats",
+                    "stats": stats,
+                    "leaderboard": serialize_leaderboard(leaderboard),
+                })
             elif await db_player_already_answered(self.player_id):
                 await self.send_json({"type": "already_answered"})
 
@@ -394,19 +469,25 @@ class QuizConsumer(AsyncWebsocketConsumer):
 
         await self.broadcast_answer_stats()
 
-    async def handle_timer_expired(self):
-        await self.sync_lobby_timing()
+    async def handle_timer_expired(self, data):
+        question_id = data.get("question_id")
+        if not isinstance(question_id, int):
+            return
+        await self.sync_lobby_timing(expected_question_id=question_id)
 
-    async def handle_reveal_expired(self):
-        await self.sync_lobby_timing()
+    async def handle_reveal_expired(self, data):
+        question_id = data.get("question_id")
+        if not isinstance(question_id, int):
+            return
+        await self.sync_lobby_timing(expected_question_id=question_id)
 
     async def handle_finish_game(self):
         await db_finish_lobby(self.lobby.id)
         leaderboard = await db_get_players_serialized(self.lobby.id)
         await self.broadcast_game_finished(leaderboard)
 
-    async def sync_lobby_timing(self, broadcast=True):
-        result = await db_sync_lobby_timing(self.lobby.id)
+    async def sync_lobby_timing(self, broadcast=True, expected_question_id=None):
+        result = await db_sync_lobby_timing(self.lobby.id, expected_question_id)
         if not broadcast or result["event"] is None:
             return result
 
@@ -422,10 +503,14 @@ class QuizConsumer(AsyncWebsocketConsumer):
 
     async def send_question_message(self, question, index):
         leaderboard = await db_get_players_serialized(self.lobby.id)
-        await self.send_json(build_question_message(question, index, leaderboard))
+        message = build_question_message(question, index, leaderboard)
+        self.schedule_from_question_message(message)
+        await self.send_json(message)
 
     async def send_reveal_message(self, question):
-        await self.send_json(build_reveal_message(question))
+        message = build_reveal_message(question)
+        self.schedule_from_reveal_message(message)
+        await self.send_json(message)
 
     async def broadcast_lobby(self):
         players = await db_get_players_serialized(self.lobby.id)
@@ -475,6 +560,7 @@ class QuizConsumer(AsyncWebsocketConsumer):
         })
 
     async def question_show(self, event):
+        self.schedule_from_question_message(event["message"])
         await self.send_json(event["message"])
 
     async def answer_stats(self, event):
@@ -488,6 +574,7 @@ class QuizConsumer(AsyncWebsocketConsumer):
             await self.send_json(payload)
 
     async def reveal_answer(self, event):
+        self.schedule_from_reveal_message(event["message"])
         await self.send_json(event["message"])
 
     async def chat_message(self, event):
@@ -506,6 +593,7 @@ class QuizConsumer(AsyncWebsocketConsumer):
         })
 
     async def game_finished_event(self, event):
+        self.cancel_timing_sync()
         await self.send_json(event["message"])
 
 
@@ -734,15 +822,16 @@ def db_player_already_answered(player_id):
 
 
 @database_sync_to_async
-def db_sync_lobby_timing(lobby_id):
+def db_sync_lobby_timing(lobby_id, expected_question_id=None):
     with transaction.atomic():
         lobby = Lobby.objects.select_for_update().filter(id=lobby_id).first()
         if not lobby or lobby.status != "play" or not lobby.current_question_id or not lobby.question_started_at:
             return {"event": None}
+        if expected_question_id is not None and lobby.current_question_id != expected_question_id:
+            return {"event": None}
 
         now = timezone.now()
         reveal_deadline = lobby.question_started_at + timedelta(seconds=QUESTION_DURATION_SECONDS)
-        advance_deadline = reveal_deadline + timedelta(seconds=QUESTION_REVEAL_SECONDS)
 
         current_question = Question.objects.filter(id=lobby.current_question_id).first()
         if not current_question:
@@ -765,7 +854,10 @@ def db_sync_lobby_timing(lobby_id):
                 ],
             }
 
-        if lobby.question_revealed_at is None and reveal_deadline <= now < advance_deadline:
+        if lobby.question_revealed_at is None:
+            if now < reveal_deadline:
+                return {"event": None}
+
             lobby.question_revealed_at = now
             lobby.save(update_fields=["question_revealed_at"])
             question = serialize_question(current_question)
@@ -773,6 +865,7 @@ def db_sync_lobby_timing(lobby_id):
             question["revealed_at"] = lobby.question_revealed_at
             return {"event": "reveal_answer", "question": question}
 
+        advance_deadline = lobby.question_revealed_at + timedelta(seconds=QUESTION_REVEAL_SECONDS)
         if now < advance_deadline:
             return {"event": None}
 
